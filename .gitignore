@@ -1,0 +1,17 @@
+*.aux
+*.idx
+*.nlo
+*.nls
+*.ilg
+*.bbl
+*.blg
+*.log
+*.brf
+*.out
+*.toc
+*.maf
+*.mtc*
+*.synctex.gz
+*~
+*.backup
+.directory

@@ -123,38 +123,53 @@ Commande prédictive, Programmation Dynamique}}
 
 \section{Introduction}
 
-Décrire le contexte et les objectifs du travail. Positionner le travail par rapport à la littérature et aux principaux travaux antérieurs. Présenter le plan de la communication. (Style ‘Normal’).
-\cite{Haessig:2014:PhD}
+\subsection{Système photovoltaïque-stockage}
+Pour illustrer la problématique, on considère un système photovoltaïque-stockage
+pour l'autoconsommation d'un consommateur résidentiel.
+
+L'objectif de pilotage énergétique est la minimisation de la facture
+de l'énergie consommmée du réseau. Le dimensionnement du système (capa stockage, pv, réseau) est considéré comme fixe.
+
+Ausgrid data :
+
+\url{https://www.ausgrid.com.au/Common/About-us/Corporate-information/Data-to-share/Solar-home-electricity-data.aspx}
+
+\url{https://github.com/pierre-haessig/ausgrid-solar-data}
 
 
 \section{Approches d'optimisation}
 
-Développer dans les sections, sous-sections et sous sous-sections (ne pas excéder 3 niveaux hiérarchiques) les travaux réalisés en présentant les grandes étapes et les principaux résultats.
-
-\textbf{Le résumé final de la communication doit comporter au maximum 2 pages et doit respecter le format décrit dans ce document. La taille du fichier pdf est par ailleurs limitée à 3.5 Mo.}
 
 
-TODO: cite
 
-* sareni sge 2014
-* thèse geeps voiture
+TODO: cite thèse geeps voiture
 
 \subsection{Programmation dynamique}
 bon cadre théorique,
+
 pb à l'implémentation
+
+\cite{Haessig:2013:ESPy}
 
 \subsection{Optimisation déterministe anticipative}
 le piège
+
+\cite{Rigo-Mariani:2014:SGE}
+
+poster µgrid powertech 2015 ?
 
 \subsection{MPC déterministe}
 le classique
 
 \subsection{MPC stochastique et robuste}
 
+une amélioration du MPC déterministe.
 
 \subsection{Commande prédictive non-linéaire}
 
 Optimica JModelica.org \cite{Akesson:2010:CCE}
+
+sareni sge 2014 \cite{Rigo-Mariani:2014:SGE} : optim linéaire puis reprojection.
 
 \begin{figure}[!ht]
 	\begin{center}
@@ -165,41 +180,13 @@ Optimica JModelica.org \cite{Akesson:2010:CCE}
 	\label{fig_1}
 \end{figure}
 
-\begin{table}[!h]
-	\caption{Mettre ici le titre du tableau}
-	
-	\begin{center}
-		\begin{tabular}{|>{\footnotesize}L{1.4cm}|>{\footnotesize}L{1.5cm}|>{\footnotesize}L{2.4cm}|>{\footnotesize}L{2.1cm}|}
-			\hline
-			\textbf{Titre colonne 1} & \textbf{Titre colonne 2} & \textbf{Style (‘Titre colonnes tableaux’)} & \textbf{} \\
-			\hline
-			Donnée 1 & Style (Cellules tableaux’) & & \\
-			\hline
-			Donnée 2 & & & \\
-			\hline
-		\end{tabular}
-	\end{center}
-	
-	\label{tab_1}
-\end{table}
-
-
-\begin{equation}
-	y = f(x) + \sum_{k=1}^{\infty} h_k \cdot sin(k \omega t)
-	\label{eq_1}
-\end{equation}
-
-
-\section{Soumission de la communication}
-
-La soumission se fait en ligne à partir du site électronique de la conférence : \url{http://sge2018.sciencesconf.org} (voir la rubrique ‘Soumission en ligne des communications’).\\
-
-Le fichier soumis sera préalablement converti au format PDF avec les polices incorporées et ne devra pas excéder la taille maximale de 3.5 Mo.
-
-
 \section{Conclusions}
 
 Rappeler les principaux résultats marquants et originaux du travail. Le cas échéant, proposer des perspectives au travail présenté.
+
+Perspectives : structure de décision dans un contexte multi-agent (pas abordé ici
+car focus sur optimisation d'un système individuel) : centralisé, distribué,
+mécanisme de prix, multi-agent...
 
 
 \section{Remerciements}

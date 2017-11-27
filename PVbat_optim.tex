@@ -9,17 +9,17 @@
 \usepackage{fancyhdr}
 \usepackage[explicit]{titlesec}
 \usepackage{hyperref}
-\usepackage[square,comma,numbers]{natbib}
+%\usepackage[square,comma,numbers]{natbib}
 \usepackage{tabularx}
 
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
 
-\renewcommand{\bibsection}{}
-\def\bibfont{\footnotesize}
-\setlength{\bibsep}{0.2em}
-\setlength{\bibhang}{10em}
+%\renewcommand{\bibsection}{}
+%\def\bibfont{\footnotesize}
+%\setlength{\bibsep}{0.2em}
+%\setlength{\bibhang}{10em}
 
 \hypersetup{colorlinks=true, urlcolor=blue, urlbordercolor={0 0 1}, citecolor=black, citebordercolor={1 1 1}}
 
@@ -71,14 +71,18 @@
 
 \title{
 \fontsize{24pt}{24pt}\selectfont
-Titre de la communication (Style ‘Titre’)
+Gestion d'énergie avec entrées incertaines : \\
+quel algorithme choisir ?\\
+Illustration pour un système PV-stockage.
 }
+
+\newcommand\tsp[1]{\textsuperscript{#1}}
 
 \author{
 \fontsize{11pt}{11pt}\selectfont
-Prénom NOM des auteurs (Style ‘Nom’)\\
+Pierre HAESSIG\tsp{*}\\
 \fontsize{10pt}{10pt}\selectfont
-Affiliation des auteurs (Style ‘Affiliation’)
+\tsp{*}CentraleSupélec -- IETR
 }
 
 \date{}
@@ -91,28 +95,66 @@ Affiliation des auteurs (Style ‘Affiliation’)
 
 
 \fontsize{9pt}{9pt}\selectfont
-\textbf{RESUME -- Écrire un résumé de la communication de 15 lignes maximum. Ce résumé doit présenter de façon synthétique les objectifs du travail présenté, les principaux résultats et insister sur les originalités du travail. (Style ‘Résumé’)}\\
+\textbf{RÉSUME --
+Le pilotage optimal des systèmes énergétiques nécessite l'emploi d'algorithmes
+de gestion optimale.
+Ces outils se rattachent à théories de disciplines variées (Automatique, Optimisation, Recheche Opérationnelle),
+qui ont chacune leur spécificité tout en se recouvrant partiellement.
+%
+Il est donc difficile, pour la personne ``non initiée'', de saisir les principales caractéristiques
+de chaque approche pour pouvoir les comparer et finalement trouver
+quelles méthodes sont plus adaptées à un problème donné.
+%
+Nous proposons ici, sur un exemple simple de système photovoltaïque-stockage, de
+comparer différentes méthodes en soulignant en particulier les investissements
+en temps à prévoir :
+temps pour la compréhension du cadre théorique,
+temps pour la modélisation du problème dans ce cadre,
+temps pour l'implémentation numérique et la validation des résultats.
+Nous soulignons également quelques pièges typiques, comme l'optimisation
+déterministe anticipative dans un contexte stochastique.
+}\\
 
-\textbf{\textit{Mots-clés -- Écrire ici une liste n’excédant pas 8 mots-clés significatifs. (Style ‘Mots-Clés’).}}
+\textbf{\textit{Gestion d'énergie, Optimisation dynamique, Optimisation stochastique,
+Commande prédictive, Programmation Dynamique}}
 
 \fontsize{10pt}{10pt}\selectfont
 
 
-\section{Introduction  (Style ‘Titre 1’)}
+\section{Introduction}
 
 Décrire le contexte et les objectifs du travail. Positionner le travail par rapport à la littérature et aux principaux travaux antérieurs. Présenter le plan de la communication. (Style ‘Normal’).
+\cite{Haessig:2014:PhD}
 
 
-\section{Titre de section (Style ‘Titre 1’)}
+\section{Approches d'optimisation}
 
 Développer dans les sections, sous-sections et sous sous-sections (ne pas excéder 3 niveaux hiérarchiques) les travaux réalisés en présentant les grandes étapes et les principaux résultats.
 
 \textbf{Le résumé final de la communication doit comporter au maximum 2 pages et doit respecter le format décrit dans ce document. La taille du fichier pdf est par ailleurs limitée à 3.5 Mo.}
 
 
-\subsection{Titre de sous-section (Style ‘Titre 2’)}
+TODO: cite
 
-Les tableaux, figures et équations doivent respecter les numérotations et formats ci-après. Les figures (Style ‘Images’) et tableaux (Style ‘Tableaux’) doivent être centrés et légendées. Les équations (Style ‘Equation’, 10 pts, centré) seront centrées et numérotées (style ‘Numéro d’équation’, Times New Roman, 10 pts, aligné à droite) et une ligne pourra être laissée libre avant et après chaque équation.
+* sareni sge 2014
+* thèse geeps voiture
+
+\subsection{Programmation dynamique}
+bon cadre théorique,
+pb à l'implémentation
+
+\subsection{Optimisation déterministe anticipative}
+le piège
+
+\subsection{MPC déterministe}
+le classique
+
+\subsection{MPC stochastique et robuste}
+
+
+\subsection{Commande prédictive non-linéaire}
+
+Optimica JModelica.org \cite{Akesson:2010:CCE}
 
 \begin{figure}[!ht]
 	\begin{center}
@@ -141,7 +183,6 @@ Les tableaux, figures et équations doivent respecter les numérotations et form
 	\label{tab_1}
 \end{table}
 
-\subsubsection{Titre de sous sous-section (Style ‘Titre 3’)}
 
 \begin{equation}
 	y = f(x) + \sum_{k=1}^{\infty} h_k \cdot sin(k \omega t)
@@ -166,20 +207,8 @@ Rappeler les principaux résultats marquants et originaux du travail. Le cas éc
 Cette partie (facultative) doit être placée entre la conclusion et les références.
 
 
-\section{Références}
-
-Citer ici les principales références du travail réalisé (style ‘Références’). Privilégier les références les plus pertinentes et les publications originelles. Numéroter les références de la même façon que dans l’exemple ci-dessous – par ordre d’apparition dans le texte.
-
-
-\begin{thebibliography}{1}
-
-\bibitem{bib_1}{T. Lubin, K. Berger, et A. Rezzoug, « Inductance and Force Calculation for Axisymmetric Coil Systems Including an Iron Core of Finite Length », Progress In Electromagnetics Research B, vol. 41, p. 377 396, juin 2012.}
-
-\bibitem{bib_2}{A. Wiederhold et al., « Electric and Magnetic Characterization of Bulk Ag-added MgB2 », in Superconductivity: Applications Today and Tomorrow, J. Muralidhar Miryala (Shibaura Institute of Technology Toyosu, Koto-ku, Tokyo, Éd. Nova Science Publishers, 2015, Chapter 12, p. 269 277.}
-
-\bibitem{bib_3}{K. Berger et al., « Benchmark on the 3D Numerical Modeling of a Superconducting Bulk », in 21st International Conference on the Computation of Electromagnetic Fields (Compumag 2017), Daejeon, South Korea, 2017, (ID 110).}
-
-\end{thebibliography}
+\bibliographystyle{IEEEtran}
+\bibliography{00_References}
 
 
 \end{document}

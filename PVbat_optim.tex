@@ -73,16 +73,16 @@
 \fontsize{24pt}{24pt}\selectfont
 Gestion d'énergie avec entrées incertaines : \\
 quel algorithme choisir ?\\
-Illustration pour un système PV-stockage.
+Illustration pour une maison solaire
 }
 
 \newcommand\tsp[1]{\textsuperscript{#1}}
 
 \author{
 \fontsize{11pt}{11pt}\selectfont
-Pierre HAESSIG\tsp{*}\\
+Pierre HAESSIG\tsp{*}, Jesse James PRINCE AGBODJAN\tsp{*}, Romain BOURDAIS\tsp{*}, Hervé GUÉGUEN\tsp{*}\\
 \fontsize{10pt}{10pt}\selectfont
-\tsp{*}CentraleSupélec -- IETR
+\tsp{*}IETR, CentraleSupélec
 }
 
 \date{}
@@ -123,12 +123,93 @@ Commande prédictive, Programmation Dynamique}}
 
 \section{Introduction}
 
-\subsection{Système photovoltaïque-stockage}
-Pour illustrer la problématique, on considère un système photovoltaïque-stockage
-pour l'autoconsommation d'un consommateur résidentiel.
+De très nombreux travaux de recherche portent sur le pilotage des systèmes énergétiques
+pour optimiser leur fonctionnement.
+Les méthodes employées sont variées (cf. partie \ref{s:opt_meth})
+et certaines nécessite un bagage théorique qui pourrait rebuter effrayer
+une personne issue d'une discipline ``physique'' (génie électrique, énergétique)
+plutôt que ``numérique'' (automatique, recherche opérationnelle) où ces méthodes
+sont souvent mises au point.
+La mise en œuvre peut également est difficile et coûteuse en temps de calcul.
+C'est malheureusement le cas en particulier des méthodes
+a priori les plus performantes du point de vue de l'optimalité.
 
-L'objectif de pilotage énergétique est la minimisation de la facture
-de l'énergie consommmée du réseau. Le dimensionnement du système (capa stockage, pv, réseau) est considéré comme fixe.
+
+\section{Banc de test: maison solaire}
+
+\subsection{Modèle de la maison solaire}
+
+\begin{figure}[!ht]
+        \begin{center}
+                \includegraphics[width=0.9\columnwidth]{figures/solar_home.pdf}
+        \end{center}
+
+        \caption{Modèle en flux d'énergie de la maison solaire.
+        Variables de décision en vert, données externes en rouge (potentiel solaire et consommation souhaitée), variables internes en noir.
+        La consommation du foyer $P_{load}^*$, imposée, est couverte par 3 sources:
+        le réseau électrique, des panneaux solaires (délestables)
+        et un système de stockage.
+        En dernier recours, la consommation de la maison peut être délestée.
+        }
+        \label{fig:solhome}
+\end{figure}
+
+Pour illustrer les différentes méthodes de gestion d'énergie à comparer,
+nous avons choisi un système ``banc de test'' qui soit à la fois simple et concret.
+Nous considérons ainsi la maison solaire qui est modélisée par
+des flux d'énergie figure \ref{fig:solhome}.
+Il s'agit d'un modèle simple de système photovoltaïque-stockage
+pour l'autoconsommation d'un consommateur résidentiel connecté au réseau.
+
+L'objectif de pilotage est la minimisation de la facture
+de l'énergie consommmée du réseau ($\int P_{grid}$), le prix de l'énergie étant considéré fixe\footnote{un prix variable serait une extension naturelle}.
+La puissance de réseau est limitée à la puissance souscrite $P_{grid}^{max}$
+et l'injection est interdite\footnote{
+équivalent, du point de vue de l'optimisation, à autoriser l'injection, mais sans la rémunérer}:
+%
+\begin{equation}
+  0 \leq P_{grid} \leq P_{grid}^{max}
+\end{equation}
+%
+Le système de gestion d'énergie doit donc tirer profit de l'énergie marginalement
+gratuite des panneaux solaires $P_{pv}$, librement réglable entre 0 et $P_{sun}$
+(par l'intermédiaire de l'écrêtage $P_{curt} \geq 0$).
+$P_{sun}$ est le potentiel solaire maximal, obtenu lorsque les panneaux sont en régime
+MPPT\footnote{Maximum power point tracking}) et qui est fonction de l'irradiance solaire du moment
+ainsi que de la puissance nominale (puissance crête) des panneaux.
+
+Le système de gestion doit également exploiter le degré de liberté offert par
+le système de stockage qui permet de décaler, au moins partiellement,
+la production solaire et la consommation. Le stockage, dont on néglige les pertes,
+contient l'énergie:
+
+\begin{equation}
+  E_{sto}(t) = \int_0^t P_{sto}(t)dt
+\end{equation}
+
+Point essentiel, le stockage a une capacité limitée $E_{rated}$ :
+
+\begin{equation}
+  0 \leq E_{sto} \leq E_{rated}
+\end{equation}
+
+Tous les flux sont liés par la conservation de l'énergie:
+
+\begin{equation}
+  P_{grid} + P_{pv} = P_{load} + P_{sto}
+\end{equation}
+
+La consommation $P_{load}$ a vocation à suivre la consommation souhaitée $P_{load}^*$
+(pas de charges ``intelligentes'' déplaçables). Nous définissons cependant un délestage de dernier
+recours pour les situations critiques\footnote{faible puissance souscrite, lorsque
+la batterie est vide et qu'il n'y a que peu de soleil}.
+
+Notons pour finir que la performance d'un tel système dépend totalement de son dimensionnement
+(capacité de stockage, puissance des panneaux et  puissance souscrite).
+La question du dimensionnement, bien qu'intéressante, n'étant pas l'objet de cet article,
+le dimensionnement est fixé empiriquement.
+
+\subsection{Données de la maison solaire}
 
 Ausgrid data :
 
@@ -138,9 +219,7 @@ Ausgrid data :
 
 
 \section{Approches d'optimisation}
-
-
-
+\label{s:opt_meth}
 
 TODO: cite thèse geeps voiture
 
@@ -171,14 +250,6 @@ Optimica JModelica.org \cite{Akesson:2010:CCE}
 
 sareni sge 2014 \cite{Rigo-Mariani:2014:SGE} : optim linéaire puis reprojection.
 
-\begin{figure}[!ht]
-	\begin{center}
-		\includegraphics[width=0.6\columnwidth]{figures/wind_storage.pdf}
-	\end{center}
-	
-	\caption{Titre de la figure (Style ‘Légende’)}
-	\label{fig_1}
-\end{figure}
 
 \section{Conclusions}
 

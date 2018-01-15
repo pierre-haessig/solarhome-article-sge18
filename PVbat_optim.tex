@@ -73,7 +73,7 @@
 \fontsize{24pt}{24pt}\selectfont
 Gestion d'énergie avec entrées incertaines : \\
 quel algorithme choisir ?\\
-Illustration pour une maison solaire
+Benchmark open source pour une maison solaire
 }
 
 \newcommand\tsp[1]{\textsuperscript{#1}}
@@ -134,6 +134,16 @@ La mise en œuvre peut également est difficile et coûteuse en temps de calcul.
 C'est malheureusement le cas en particulier des méthodes
 a priori les plus performantes du point de vue de l'optimalité.
 
+En réponse à ces difficultés, nous proposons un \emph{banc de test de gestion d'énergie open source}.
+Il permet, sur un exemple simple mais pertinent, d'avoir un aperçu de différentes méthodes
+de pilotage. Cela permet de comparer leur mise en oeuvre (e.g. dans différents langages de programmation)
+et leur résultats (optimalité, robustesse...).
+
+Il existe des travaux comparant des méthodes de gestion d'énergie, sur des exemples réels complexes
+(barrages hydroélectriques \cite{Zambelli:2011:SBA}, véhicules hybrides \cite{Jiang:2017:ToVT}).
+Notre proposition est complémentaire, car elle porte d'avantage sur la comparaison \emph{fonctionnelle}
+des méthodes (e.g. analyse des objets nécessaire pour leur mise en oeuvre) que
+sur la comparaison quantitative des résultats d'optimisation.
 
 \section{Banc de test: maison solaire}
 
@@ -209,65 +219,108 @@ Notons pour finir que la performance d'un tel système dépend totalement de son
 La question du dimensionnement, bien qu'intéressante, n'étant pas l'objet de cet article,
 le dimensionnement est fixé empiriquement.
 
+Dimensionnement: $E_{rated}=13.5\,$kWh (Tesla Powerwall), $P_{pv}^{max}=3\,$kW\textsubscript{c} (permet, en cumul annuel, de couvrir 64\% de la consommation du foyer présenté ci-après).
+
+\subsection{Banc de test open source}
+
+La description de ce modèle ainsi que les données temporelles nécessaires sont
+disponibles en open source dans un dépôt GitHub \href{https://github.com/pierre-haessig/solarhome-control-bench}{solarhome-control-bench}.
+Ce dépôt contient également les méthodes de gestion d'énergie présentées dans cet article.
+
+Il a vocation à contenir des exemples dans les langages de programmation les plus utilisées pour ce type de problème:
+Matlab, Python et Julia...
+
 \subsection{Données de la maison solaire}
 
-Ausgrid data :
+Nous utilisons le jeu de \emph{données réelles et ouvert} ``\href{https://www.ausgrid.com.au/Common/About-us/Corporate-information/Data-to-share/Solar-home-electricity-data.aspx}{Solar home electricity data}'' de l'opérateur Ausgrid (réseau de Sydney et sa région, Australie).
+Il contient 3 années de consommation et production, au pas demi-horaire, de 300 clients résidentiels disposants de panneaux PV.
 
-\url{https://www.ausgrid.com.au/Common/About-us/Corporate-information/Data-to-share/Solar-home-electricity-data.aspx}
+Pour notre banc de test, nous avons sélectionné un client sans charge pilotable\footnote{
+  la description détaillées de ce choix est fourni dans le fichier \href{https://github.com/pierre-haessig/solarhome-control-bench/blob/master/data/README.md}{data/README.md} du dépôt, avec plusieurs graphiques supplémentaires.}.
+Nous avons choisi 7 jours consécutifs de test représentés figure \ref{fig:testdata} (après mise à l'échelle à 3 kW\textsubscript{c} de son installation PV).
 
-\url{https://github.com/pierre-haessig/ausgrid-solar-data}
+Les données des 30 jours précédents sont également disponibles pour une phase d'apprentissage,
+par exemple pour régler la prévision d'une commande prédictive.
+
+
+\begin{figure}[!ht]
+        \begin{center}
+                \includegraphics[width=1\columnwidth]{figures/data_week_2011-11-29.pdf}
+        \end{center}
+
+        \caption{Consommmation et production PV durant les 7 jours de test
+        }
+        \label{fig:testdata}
+\end{figure}
 
 
 \section{Approches d'optimisation}
 \label{s:opt_meth}
 
-TODO: cite thèse geeps voiture
+L'article final décrira les différentes méthodes comparées pour la gestion de la maison solaire,
+avec les résultats obtenus.
 
 \subsection{Programmation dynamique}
-bon cadre théorique,
+Bon cadre théorique pour poser un problème de gestion avec entrées incertaines (stochastique).
+Point particulier: nécessite une modélisation des incertitudes par un \emph{processus markovien}\cite{Haessig:2013:ESPy}.
+L'implémentation numérique est impossible si la dimension de l'état est trop grande (≥4).
 
-pb à l'implémentation
-
-\cite{Haessig:2013:ESPy}
 
 \subsection{Optimisation déterministe anticipative}
-le piège
 
-\cite{Rigo-Mariani:2014:SGE}
+Un piège courant consiste à optimiser la gestion avec une connaissance parfaite des entrées.
+Le résultat (figure \ref{fig:anticip}) est une surévaluation de la performance (e.g. aucun délestage de la production solaire).
 
-poster µgrid powertech 2015 ?
+%\cite{Rigo-Mariani:2014:SGE}
+% poster µgrid powertech 2015 ?
 
-\subsection{MPC déterministe}
-le classique
+\begin{figure}[!ht]
+        \begin{center}
+                \includegraphics[width=1\columnwidth]{figures/julia_anticipative.pdf}
+        \end{center}
 
-\subsection{MPC stochastique et robuste}
+        \caption{Gestion d'énergie par optimisation déterministe anticipative. La performance est surestimée
+        (aucun délestage de production solaire).
+        }
+        \label{fig:anticip}
+\end{figure}
 
-une amélioration du MPC déterministe.
+\subsection{Commande prédictive (MPC)}
+La commande prédictive (MPC) utilise une \emph{prévision ponctuelle (moyenne)} des entrées incertaines.
+Elle compense l'erreur de prévision en répétant l'optimisation sur un \emph{horizon glissant}.
+L'implémentation numérique est efficace si le problème d'optimisation est linéaire (ou en tout cas convexe),
+ce qui est le cas ici.
 
-\subsection{Commande prédictive non-linéaire}
+Des variantes du MPC déterministe existent pour mieux faire face à l'incertain: le MPC stochastique,
+qui utilisent un \emph{ensemble de scénarios}, éventuellement avec un ``recours affine''.
 
-Optimica JModelica.org \cite{Akesson:2010:CCE}
+%\subsection{MPC stochastique et robuste}
 
-sareni sge 2014 \cite{Rigo-Mariani:2014:SGE} : optim linéaire puis reprojection.
+%une amélioration du MPC déterministe.
+
+% \subsection{Commande prédictive non-linéaire}
+% 
+% Optimica JModelica.org \cite{Akesson:2010:CCE}
+% 
+% sareni sge 2014 \cite{Rigo-Mariani:2014:SGE} : optim linéaire puis reprojection.
 
 
 \section{Conclusions}
 
-Rappeler les principaux résultats marquants et originaux du travail. Le cas échéant, proposer des perspectives au travail présenté.
+Le banc de test pour la gestion d'énergie d'une maison solaire
+doit permettre de faciliter l'accès à une palette de méthode de gestion
+sur un exemple simple mais réaliste (e.g. données de production solaire et de consommation réelles).
 
-Perspectives : structure de décision dans un contexte multi-agent (pas abordé ici
-car focus sur optimisation d'un système individuel) : centralisé, distribué,
-mécanisme de prix, multi-agent...
+Perspectives : ce banc de test pour la gestion d'énergie,
+à dimensionnement fixé, est une première étape pour l'étude des méthodes
+de dimensionnement optimal qui prennent en compte l'optimisation de la loi de gestion
+\cite{Haessig:2014:SGE}.
 
-
-\section{Remerciements}
-
-Cette partie (facultative) doit être placée entre la conclusion et les références.
-
+% structure de décision dans un contexte multi-agent (pas abordé ici
+% car focus sur optimisation d'un système individuel) : centralisé, distribué,
+% mécanisme de prix, multi-agent...
 
 \bibliographystyle{IEEEtran}
 \bibliography{00_References}
 
-
 \end{document}
-

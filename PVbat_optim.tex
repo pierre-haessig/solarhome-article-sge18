@@ -73,7 +73,7 @@
 \fontsize{24pt}{24pt}\selectfont
 Gestion d'énergie avec entrées incertaines : \\
 quel algorithme choisir ?\\
-Benchmark open source pour une maison solaire
+Maison solaire pour un benchmark open source
 }
 
 \newcommand\tsp[1]{\textsuperscript{#1}}
@@ -101,7 +101,7 @@ de gestion optimale.
 Ces outils se rattachent à théories de disciplines variées (Automatique, Optimisation, Recheche Opérationnelle),
 qui ont chacune leur spécificité tout en se recouvrant partiellement.
 %
-Il est donc difficile, pour la personne ``non initiée'', de saisir les principales caractéristiques
+Il est donc difficile, pour la personne ``non-initiée'', de saisir les principales caractéristiques
 de chaque approche pour pouvoir les comparer et finalement trouver
 quelles méthodes sont plus adaptées à un problème donné.
 %
@@ -135,14 +135,14 @@ C'est malheureusement le cas en particulier des méthodes
 a priori les plus performantes du point de vue de l'optimalité.
 
 En réponse à ces difficultés, nous proposons un \emph{banc de test de gestion d'énergie open source}.
-Il permet, sur un exemple simple mais pertinent, d'avoir un aperçu de différentes méthodes
+Il permet, sur un exemple simple, mais pertinent, d'avoir un aperçu de différentes méthodes
 de pilotage. Cela permet de comparer leur mise en oeuvre (e.g. dans différents langages de programmation)
-et leur résultats (optimalité, robustesse...).
+et leurs résultats (optimalité, robustesse...).
 
 Il existe des travaux comparant des méthodes de gestion d'énergie, sur des exemples réels complexes
 (barrages hydroélectriques \cite{Zambelli:2011:SBA}, véhicules hybrides \cite{Jiang:2017:ToVT}).
-Notre proposition est complémentaire, car elle porte d'avantage sur la comparaison \emph{fonctionnelle}
-des méthodes (e.g. analyse des objets nécessaire pour leur mise en oeuvre) que
+Notre proposition est complémentaire, car elle porte davantage sur la comparaison \emph{fonctionnelle}
+des méthodes (e.g. analyse des objets nécessaires pour leur mise en oeuvre) que
 sur la comparaison quantitative des résultats d'optimisation.
 
 \section{Banc de test: maison solaire}
@@ -172,7 +172,7 @@ Il s'agit d'un modèle simple de système photovoltaïque-stockage
 pour l'autoconsommation d'un consommateur résidentiel connecté au réseau.
 
 L'objectif de pilotage est la minimisation de la facture
-de l'énergie consommmée du réseau ($\int P_{grid}$), le prix de l'énergie étant considéré fixe\footnote{un prix variable serait une extension naturelle}.
+de l'énergie consommée du réseau ($\int P_{grid}$), le prix de l'énergie étant considéré fixe\footnote{un prix variable serait une extension naturelle}.
 La puissance de réseau est limitée à la puissance souscrite $P_{grid}^{max}$
 et l'injection est interdite\footnote{
 équivalent, du point de vue de l'optimisation, à autoriser l'injection, mais sans la rémunérer}:
@@ -181,12 +181,13 @@ et l'injection est interdite\footnote{
   0 \leq P_{grid} \leq P_{grid}^{max}
 \end{equation}
 %
-Le système de gestion d'énergie doit donc tirer profit de l'énergie marginalement
-gratuite des panneaux solaires $P_{pv}$, librement réglable entre 0 et $P_{sun}$
+Le système de gestion d'énergie doit donc tirer profit de l'énergie, marginalement
+gratuite, des panneaux solaires $P_{pv}$, librement réglable entre 0 et $P_{sun}$
 (par l'intermédiaire de l'écrêtage $P_{curt} \geq 0$).
-$P_{sun}$ est le potentiel solaire maximal, obtenu lorsque les panneaux sont en régime
-MPPT\footnote{Maximum power point tracking}) et qui est fonction de l'irradiance solaire du moment
-ainsi que de la puissance nominale (puissance crête) des panneaux.
+$P_{sun}$ est le productible solaire, c'est-à-dire la production des panneaux en régime
+MPPT\footnote{Maximum power point tracking}.
+Ce productible est fonction de l'irradiance solaire du moment
+et de la puissance nominale (puissance crête) des panneaux $P_{pv}^{max}$.
 
 Le système de gestion doit également exploiter le degré de liberté offert par
 le système de stockage qui permet de décaler, au moins partiellement,
@@ -227,7 +228,7 @@ La description de ce modèle ainsi que les données temporelles nécessaires son
 disponibles en open source dans un dépôt GitHub \href{https://github.com/pierre-haessig/solarhome-control-bench}{solarhome-control-bench}.
 Ce dépôt contient également les méthodes de gestion d'énergie présentées dans cet article.
 
-Il a vocation à contenir des exemples dans les langages de programmation les plus utilisées pour ce type de problème:
+Il a vocation à contenir des exemples dans les langages de programmation les plus utilisés pour ce type de problème:
 Matlab, Python et Julia...
 
 \subsection{Données de la maison solaire}
@@ -236,7 +237,7 @@ Nous utilisons le jeu de \emph{données réelles et ouvert} ``\href{https://www.
 Il contient 3 années de consommation et production, au pas demi-horaire, de 300 clients résidentiels disposants de panneaux PV.
 
 Pour notre banc de test, nous avons sélectionné un client sans charge pilotable\footnote{
-  la description détaillées de ce choix est fourni dans le fichier \href{https://github.com/pierre-haessig/solarhome-control-bench/blob/master/data/README.md}{data/README.md} du dépôt, avec plusieurs graphiques supplémentaires.}.
+  la description détaillée de ce choix est fournie dans le fichier \href{https://github.com/pierre-haessig/solarhome-control-bench/blob/master/data/README.md}{data/README.md} du dépôt, avec plusieurs graphiques supplémentaires.}.
 Nous avons choisi 7 jours consécutifs de test représentés figure \ref{fig:testdata} (après mise à l'échelle à 3 kW\textsubscript{c} de son installation PV).
 
 Les données des 30 jours précédents sont également disponibles pour une phase d'apprentissage,
@@ -248,7 +249,7 @@ par exemple pour régler la prévision d'une commande prédictive.
                 \includegraphics[width=1\columnwidth]{figures/data_week_2011-11-29.pdf}
         \end{center}
 
-        \caption{Consommmation et production PV durant les 7 jours de test
+        \caption{Consommation et production PV durant les 7 jours de test
         }
         \label{fig:testdata}
 \end{figure}
@@ -263,7 +264,7 @@ avec les résultats obtenus.
 \subsection{Programmation dynamique}
 Bon cadre théorique pour poser un problème de gestion avec entrées incertaines (stochastique).
 Point particulier: nécessite une modélisation des incertitudes par un \emph{processus markovien}\cite{Haessig:2013:ESPy}.
-L'implémentation numérique est impossible si la dimension de l'état est trop grande (≥4).
+L'implémentation numérique est impossible si la dimension de l'état est trop grande (>4).
 
 
 \subsection{Optimisation déterministe anticipative}
@@ -292,7 +293,7 @@ L'implémentation numérique est efficace si le problème d'optimisation est lin
 ce qui est le cas ici.
 
 Des variantes du MPC déterministe existent pour mieux faire face à l'incertain: le MPC stochastique,
-qui utilisent un \emph{ensemble de scénarios}, éventuellement avec un ``recours affine''.
+qui utilise un \emph{ensemble de scénarios}, éventuellement avec un ``recours affine''.
 
 %\subsection{MPC stochastique et robuste}
 

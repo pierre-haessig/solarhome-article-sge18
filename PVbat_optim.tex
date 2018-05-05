@@ -12,6 +12,9 @@
 %\usepackage[square,comma,numbers]{natbib}
 \usepackage{tabularx}
 
+% Petits extras:
+\usepackage{textcomp} % Symbole Euro € \texteuro
+
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
 \newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
@@ -73,7 +76,7 @@
 \fontsize{24pt}{24pt}\selectfont
 Gestion d'énergie avec entrées incertaines : \\
 quel algorithme choisir ?\\
-Maison solaire pour un benchmark open source
+Benchmark open source sur une maison solaire
 }
 
 \newcommand\tsp[1]{\textsuperscript{#1}}
@@ -105,18 +108,24 @@ Il est donc difficile, pour la personne ``non-initiée'', de saisir les principa
 de chaque approche pour pouvoir les comparer et finalement trouver
 quelles méthodes sont plus adaptées à un problème donné.
 %
-Nous proposons ici, sur un exemple simple de système photovoltaïque-stockage, de
-comparer différentes méthodes en soulignant en particulier les investissements
-en temps à prévoir :
-temps pour la compréhension du cadre théorique,
-temps pour la modélisation du problème dans ce cadre,
-temps pour l'implémentation numérique et la validation des résultats.
-Nous soulignons également quelques pièges typiques, comme l'optimisation
-déterministe anticipative dans un contexte stochastique.
+Pour permettre une comparaison objective et transparente,
+nous proposons de problème simple de gestion d'énergie : une maison solaire 
+avec production photovoltaïque et stockage, dont nous justifions le dimensionnement.
+Ce benchmark accessible en ligne est open source et multi-langage (Python, Julia et Matlab).
+Nous l'illustrons par une première comparaison de quelques méthodes de gestion d'énergie
+(règle heuristique, MPC et optimisation anticipative)
+et nous soulignons en particulier l'effet de l'incertitude
+sur la production solaire.
+% Extrait de l'ancien résumé, avec des idées à reprendre?
+% comparer différentes méthodes en soulignant en particulier les investissements
+% en temps à prévoir :
+% temps pour la compréhension du cadre théorique,
+% temps pour la modélisation du problème dans ce cadre,
+% temps pour l'implémentation numérique et la validation des résultats.
 }\\
 
 \textbf{\textit{Gestion d'énergie, Optimisation dynamique, Optimisation stochastique,
-Commande prédictive, Programmation Dynamique}}
+Commande prédictive, Autoconsommation photovoltaïque}}
 
 \fontsize{10pt}{10pt}\selectfont
 
@@ -125,25 +134,40 @@ Commande prédictive, Programmation Dynamique}}
 
 De très nombreux travaux de recherche portent sur le pilotage des systèmes énergétiques
 pour optimiser leur fonctionnement.
-Les méthodes employées sont variées (cf. partie \ref{s:opt_meth})
-et certaines nécessite un bagage théorique qui pourrait rebuter effrayer
-une personne issue d'une discipline ``physique'' (génie électrique, énergétique)
-plutôt que ``numérique'' (automatique, recherche opérationnelle) où ces méthodes
-sont souvent mises au point.
-La mise en œuvre peut également est difficile et coûteuse en temps de calcul.
-C'est malheureusement le cas en particulier des méthodes
-a priori les plus performantes du point de vue de l'optimalité.
+Les méthodes de gestion d'énergie, développées depuis les années 1950,
+sont nombreuses et variées (cf. partie \ref{s:opt_meth}).
+Ainsi, la personne qui aborde un problème de gestion d'énergie
+est confrontée à un choix qui est souvent difficile à \emph{objectiver}.
+En effet, les difficutés associées à chaque méthode sont de nature divers:
+difficultés de compréhension du cadre théorique, difficultés d'implémentation
+numérique ou de temps de calcul, et parfois existence de
+``dépendances cachées''\footnote{exemples de dépendance:
+la méthode ``commande prédictive'' (MPC) nécessite d'avoir des prévisions des entrées incertaines.
+Beaucoup d'autres méthodes nécessitent des modèles statistiques de ces entrées.}
+Malheureusement, les méthodes a priori les plus performantes du point de vue de l'optimalité
+cumulent la plupart des ces difficultés.
+Dès lors, la personne face au choix pourrait avoir peur d'investir beaucoup de son temps
+dans une méthode ``complexe'' si elle n'a pas une certaine assurance d'obtenir une meilleure
+performance qu'avec une méthode ``simple''.
 
-En réponse à ces difficultés, nous proposons un \emph{banc de test de gestion d'énergie open source}.
+Pour sortir de ce dilemme, nous souhaitons faciliter la \emph{comparaison objective},
+sans préjugés, des méthodes de gestion d'énergie.
+Nous proposons donc un \emph{banc de test de gestion d'énergie open source}.
 Il permet, sur un exemple simple, mais pertinent, d'avoir un aperçu de différentes méthodes
-de pilotage. Cela permet de comparer leur mise en oeuvre (e.g. dans différents langages de programmation)
-et leurs résultats (optimalité, robustesse...).
+de pilotage\footnote{``pilotage'', ``gestion'', ``commande'', ``optimisation''...
+le vocabulaire change selon les disciplines ou le contexte.
+Nous utilisons ici ces termes de façon interchangeable.}.
+Ce benchmark doit permettre de comparer les comparer
+à la fois du point de vue de la performance (optimalité du résultat),
+mais aussi de comparer leur mise en oeuvre, en particulier l'implémentation
+dans différents langages de programmation.
 
 Il existe des travaux comparant des méthodes de gestion d'énergie, sur des exemples réels complexes
 (barrages hydroélectriques \cite{Zambelli:2011:SBA}, véhicules hybrides \cite{Jiang:2017:ToVT}).
-Notre proposition est complémentaire, car elle porte davantage sur la comparaison \emph{fonctionnelle}
+Notre proposition est complémentaire, car elle porte au moins autant sur la comparaison \emph{fonctionnelle}
 des méthodes (e.g. analyse des objets nécessaires pour leur mise en oeuvre) que
 sur la comparaison quantitative des résultats d'optimisation.
+Par ailleurs, notre proposition est librement accessible à tous (code et données open source).
 
 \section{Banc de test: maison solaire}
 
@@ -166,14 +190,41 @@ sur la comparaison quantitative des résultats d'optimisation.
 
 Pour illustrer les différentes méthodes de gestion d'énergie à comparer,
 nous avons choisi un système ``banc de test'' qui soit à la fois simple et concret.
-Nous considérons ainsi la maison solaire qui est modélisée par
-des flux d'énergie figure \ref{fig:solhome}.
-Il s'agit d'un modèle simple de système photovoltaïque-stockage
+Nous considérons une maison solaire modélisée par
+des flux d'énergie (figure \ref{fig:solhome}).
+Il s'agit d'un modèle simple de système photovoltaïque avec stockage
 pour l'autoconsommation d'un consommateur résidentiel connecté au réseau.
+Le modèle s'exprime à temps discret (instant $k$ entier),
+avec un pas de temps $\Delta_t$. On note $n$ la durée du test
+en nombres de pas.
 
-L'objectif de pilotage est la minimisation de la facture
-de l'énergie consommée du réseau ($\int P_{grid}$), le prix de l'énergie étant considéré fixe\footnote{un prix variable serait une extension naturelle}.
-La puissance de réseau est limitée à la puissance souscrite $P_{grid}^{max}$
+L'objectif de pilotage est la minimisation de la facture d'électricité,
+c'est à dire le coût de l'énergie consommée du réseau:
+
+\begin{equation} \label{eq:C_grid}
+  C_{grid} = \sum_{k=1}^{n} c_{grid}(k)P_{grid}(k)
+\end{equation}
+
+où $c_{grid}$ est le prix de l'énergie (\texteuro/kWh), potentiellement variable,
+mais connu à l'avance.
+En plus du signal prix, connu, les données du problèmes (en rouge sur la figure) sont:
+
+\begin{itemize}
+ \item $P_{sun}$ : productible solaire, c'est-à-dire la production des panneaux en régime
+MPPT\footnote{Maximum power point tracking}
+ \item $P_{load}^*$ : consommation souhaitée par la maison
+\end{itemize}
+
+En revanche, ces deux signaux ne sont pas connus à l'avance :
+ce sont des \emph{entrées incertaines}.
+On note que le productible solaire est proportionnel
+à la puissance nominale (puissance crête) des panneaux $P_{PVp}$ (kWc),
+qui est un paramètre de dimensionnement et non d'optimisation.
+Du point de vue de la gestion d'énergie, $P_{PVp}$ est donc fixée.
+
+Les degrés de libertés du problème (en vert sur la figure) sont au nombre de quatre.
+La puissance soutirée du réseau, $P_{grid}$,
+est libre mais limitée à la puissance souscrite $P_{grid}^{max}$
 et l'injection est interdite\footnote{
 équivalent, du point de vue de l'optimisation, à autoriser l'injection, mais sans la rémunérer}:
 %
@@ -181,25 +232,26 @@ et l'injection est interdite\footnote{
   0 \leq P_{grid} \leq P_{grid}^{max}
 \end{equation}
 %
-Le système de gestion d'énergie doit donc tirer profit de l'énergie, marginalement
-gratuite, des panneaux solaires $P_{pv}$, librement réglable entre 0 et $P_{sun}$
-(par l'intermédiaire de l'écrêtage $P_{curt} \geq 0$).
-$P_{sun}$ est le productible solaire, c'est-à-dire la production des panneaux en régime
-MPPT\footnote{Maximum power point tracking}.
-Ce productible est fonction de l'irradiance solaire du moment
-et de la puissance nominale (puissance crête) des panneaux $P_{pv}^{max}$.
-
-Le système de gestion doit également exploiter le degré de liberté offert par
-le système de stockage qui permet de décaler, au moins partiellement,
-la production solaire et la consommation. Le stockage, dont on néglige les pertes,
-contient l'énergie:
-
+Le système de gestion d'énergie peut tirer profit de l'énergie, marginalement
+gratuite, produite par les panneaux solaires $P_{pv}$.
+Cette puissance est librement réglable entre 0 et $P_{sun}$ grâce à la variable
+d'écrêtage $P_{curt}$ :
+%
 \begin{equation}
-  E_{sto}(t) = \int_0^t P_{sto}(t)dt
+  P_{pv} = P_{sun} - P_{curt}, \text{ avec } 0 \leq P_{curt} \leq P_{sun}
 \end{equation}
 
-Point essentiel, le stockage a une capacité limitée $E_{rated}$ :
-
+Le système de gestion peut enfin exploiter le degré de liberté offert par
+le système de stockage qui permet de décaler, au moins partiellement,
+la production solaire et la consommation.
+Le stockage, dont on néglige les pertes, est modélisé par l'énergie qu'il contient:
+%
+\begin{equation}
+  E_{sto}(k+1) = E_{sto}(k) + P_{sto}(k)\Delta_t
+\end{equation}
+%
+et ce stockage a une capacité limitée $E_{rated}$ :
+%
 \begin{equation}
   0 \leq E_{sto} \leq E_{rated}
 \end{equation}
@@ -207,13 +259,27 @@ Point essentiel, le stockage a une capacité limitée $E_{rated}$ :
 Tous les flux sont liés par la conservation de l'énergie:
 
 \begin{equation}
-  P_{grid} + P_{pv} = P_{load} + P_{sto}
+  P_{grid} + \underbrace{P_{sun} - P_{curt}}_{P_{pv}} = P_{load} + P_{sto}
 \end{equation}
 
 La consommation $P_{load}$ a vocation à suivre la consommation souhaitée $P_{load}^*$
-(pas de charges ``intelligentes'' déplaçables). Nous définissons cependant un délestage de dernier
+(pas de charges ``intelligentes'' déplaçables), et dans tout cet article, ces deux
+variables seront égales et donc assimilés.
+Nous définissons cependant $P_{shed}$ comme un délestage de dernier
 recours pour les situations critiques\footnote{faible puissance souscrite, lorsque
-la batterie est vide et qu'il n'y a que peu de soleil}.
+la batterie est vide et qu'il n'y a que peu de soleil} et qui permet
+de ramener $P_{load}$ à zéro si nécessaire:
+%
+\begin{equation}
+  P_{load} = P_{load}^* - P_{shed}, \text{ avec } 0 \leq P_{shed} \leq P_{load}^*
+\end{equation}
+
+Si ce quatrième degré de liberté doit être utilisé,
+alors il faut l'ajouter comme pénalité dans la fonction coût \eqref{eq:C_grid}.
+
+\subsection{Dimensionnement}
+
+TO BE CONTINUED
 
 Notons pour finir que la performance d'un tel système dépend totalement de son dimensionnement
 (capacité de stockage, puissance des panneaux et  puissance souscrite).

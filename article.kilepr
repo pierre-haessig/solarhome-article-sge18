@@ -35,10 +35,10 @@ order=-1
 
 [item:PVbat_optim.tex]
 archive=true
-column=79
+column=29
 encoding=UTF-8
 highlight=LaTeX
-line=277
+line=283
 mode=LaTeX
 open=true
 order=0
@@ -54,7 +54,7 @@ open=false
 order=-1
 
 [view-settings,view=0,item:PVbat_optim.tex]
-CursorColumn=79
-CursorLine=277
+CursorColumn=29
+CursorLine=283
 JumpList=
-ViMarks=.,277,78,[,277,78,],277,78
+ViMarks=.,284,0,[,284,0,],284,0

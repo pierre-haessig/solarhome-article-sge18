@@ -279,6 +279,29 @@ alors il faut l'ajouter comme pénalité dans la fonction coût \eqref{eq:C_grid
 
 \subsection{Dimensionnement}
 
+\begin{figure}[!ht]
+  \begin{center}
+	  \includegraphics[width=0.8\columnwidth]{figures/Sizing_E_grid_invest_heatmap.pdf}
+  \end{center}
+
+  \caption{Effet du dimensionnement sur la consommation d'énergie réseau.
+  Superposition des lignes d'iso-investissement
+  }
+  \label{fig:P_grid_map}
+\end{figure}
+
+\begin{figure}[!ht]
+  \begin{center}
+	  \includegraphics[width=0.8\columnwidth]{figures/Total_cost_map_grid020.pdf}
+  \end{center}
+
+  \caption{Coût total (investissement + fonctionnement)
+  }
+  \label{fig:cost_tot}
+\end{figure}
+
+
+
 TO BE CONTINUED
 
 Notons pour finir que la performance d'un tel système dépend totalement de son dimensionnement
@@ -342,14 +365,15 @@ Le résultat (figure \ref{fig:anticip}) est une surévaluation de la performance
 % poster µgrid powertech 2015 ?
 
 \begin{figure}[!ht]
-        \begin{center}
-                \includegraphics[width=1\columnwidth]{figures/julia_anticipative.pdf}
-        \end{center}
+  \begin{center}
+    \includegraphics[width=1\columnwidth]{figures/matlab_rule-based.pdf}
+    \includegraphics[width=1\columnwidth]{figures/matlab_mpc.pdf}
+    \includegraphics[width=1\columnwidth]{figures/julia_anticipative.pdf}
+  \end{center}
 
-        \caption{Gestion d'énergie par optimisation déterministe anticipative. La performance est surestimée
-        (aucun délestage de production solaire).
-        }
-        \label{fig:anticip}
+  \caption{Gestion d'énergie par optimisation déterministe anticipative. La performance est surestimée
+  }
+  \label{fig:anticip}
 \end{figure}
 
 \subsection{Commande prédictive (MPC)}
@@ -360,6 +384,16 @@ ce qui est le cas ici.
 
 Des variantes du MPC déterministe existent pour mieux faire face à l'incertain: le MPC stochastique,
 qui utilise un \emph{ensemble de scénarios}, éventuellement avec un ``recours affine''.
+
+\begin{figure}[!ht]
+        \begin{center}
+                \includegraphics[width=1\columnwidth]{figures/Average_grid_Energy_cost.pdf}
+        \end{center}
+
+        \caption{Effet de l'horizon
+        }
+        \label{fig:mpc_horiz}
+\end{figure}
 
 %\subsection{MPC stochastique et robuste}
 

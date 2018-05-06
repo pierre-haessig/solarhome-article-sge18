@@ -11,6 +11,13 @@
 \usepackage{hyperref}
 %\usepackage[square,comma,numbers]{natbib}
 \usepackage{tabularx}
+\usepackage{xcolor}
+
+%for columns spanning multiple rows in tables
+\usepackage{multirow}
+%use the booktabs package to get (much!) better vertical spacing above and below "rules" (horizontal lines), resulting in a much more professional look of your tables.
+%use the colortbl package to add color to tables.
+\usepackage{booktabs,colortbl}
 
 % Petits extras:
 \usepackage{textcomp} % Symbole Euro € \texteuro
@@ -405,6 +412,62 @@ qui utilise un \emph{ensemble de scénarios}, éventuellement avec un ``recours 
 % 
 % sareni sge 2014 \cite{Rigo-Mariani:2014:SGE} : optim linéaire puis reprojection.
 
+\subsection{Comparaison}
+
+
+
+\begin{table}[!ht]
+%% increase table row spacing, adjust to taste
+\renewcommand{\arraystretch}{1.2}
+
+\caption{Performance des différentes méthodes de gestion d'énergie}
+\label{tab:stats}
+
+\noindent
+\centering
+  \begin{minipage}{\linewidth} %Use the minipage environment to footnote tables
+  \renewcommand\footnoterule{\vspace*{-5pt}} %to remove the horizontal rule above the table footnote
+  \begin{center}
+    \begin{tabular}{c c c c c}
+      \toprule
+      \multirow{2}{*}{Méthode} & \multicolumn{4}{c}{Moyennes journalières (kWh/j, \texteuro/j)} \\
+      \cline{2-5}
+	& $P_{sto}$
+        & $P_{curt}$
+        & $P_{grid}$
+        & $c_{grid}.P_{grid}$
+        \\
+      \midrule
+      heuristique
+          & 0.03
+          & 1.94
+          & 3.38
+          & 0.563\\
+      MPC
+          & 0.03
+          & 2.94
+          & 4.38
+          & 0.543\\
+      MPC anticip.
+          & 0.03
+          & 1.94
+          & 3.38
+          & 0.354\\
+      optim. anticip.
+          & 0.00
+          & 1.97
+          & 3.38
+          & 0.354\\
+      optim. éner.
+          & 0.00
+          & 1.97
+          & 3.38
+          & 0.631\\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+  \end{minipage}
+\end{table}
 
 \section{Conclusions}
 

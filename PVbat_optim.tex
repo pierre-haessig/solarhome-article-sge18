@@ -237,7 +237,7 @@ MPPT\footnote{Maximum power point tracking}
 En revanche, ces deux signaux ne sont pas connus à l'avance :
 ce sont des \emph{entrées incertaines}.
 On note que le productible solaire est proportionnel
-à la puissance nominale (puissance crête) des panneaux $P_{PVp}$ (kWc),
+à la puissance nominale (puissance crête) des panneaux $P_{PVp}$ (kW\sub{c}),
 qui est un paramètre de dimensionnement et non d'optimisation.
 Du point de vue de la gestion d'énergie, $P_{PVp}$ est donc fixée.
 
@@ -412,7 +412,7 @@ calculés par bootstrap.}
       \multicolumn{2}{c}{Paramètres} & \multicolumn{2}{c}{Statistiques des données} \\
       \midrule
       $E_{rated}$       & 8 kWh  & $\avg{P_{load}^*}$ &    17,02 \deta{± 0.33} kWh/j\\
-      $P_{PVp}$         & 4 kWc  & $\avg{P_{sun}}$    &    15,60 \deta{± 0.96} kWh/j\\
+      $P_{PVp}$         & 4 \sub{c}  & $\avg{P_{sun}}$    &    15,60 \deta{± 0.96} kWh/j\\
       $P_{grid}^{max}$  & 3 kW   & $\avg{P_{nl}}$     & \;\,1,42 \deta{± 0.94} kWh/j\\
       \bottomrule
     \end{tabular}
@@ -471,7 +471,7 @@ des panneaux et la capacité de la batterie:
 \end{equation} 
 et nous avons choisi $c_E$ = 0.5 €/kWh (source : un Tesla Powerwall de 13,5 kWh s'affiche à 7 k€)
 et $c_P$ = 2 €/kW\sub{c} (optimiste pour une petite installation de 4 kW\sub{c},
-mais raisonnable pour une installation ``9 à 36 kWc, ISB''\footnote{\url{http://www.photovoltaique.info/Couts-d-investissement.html}}).
+mais raisonnable pour une installation ``9 à 36 \sub{c}, ISB''\footnote{\url{http://www.photovoltaique.info/Couts-d-investissement.html}}).
 Les iso-lignes d'investissement (noires) sont donc des droites inclinées
 et le dimensionnement choisi coûte 12\,k€.
 
@@ -822,7 +822,94 @@ L'effet d'anticipation joue donc bien un rôle important.
 \subsection{Commande prédictive (MPC)}
 \label{ss:mpc}
 
-La commande prédictive (MPC) utilise une \emph{prévision ponctuelle (moyenne)} des entrées incertaines.
+La commande prédictive (MPC, pour Model Predictive Control en anglais)
+est une méthode très utilisée académiquement et dans l'industrie
+pour la gestion d'énergie et la commande des systèmes en général\footnote{
+  En toute rigueur, il faut distinguer le
+  ``tracking MPC'' où l'optimisation d'une fonction coût, souvent quadratique,
+  n'est qu'une façon indirecte pour suivre une trajectoire prédéfinie,
+  et le ``Economical MPC'' où la minimisation du coût, pas forcément quadratique,
+  et sans trajectoire fixée a priori, est l'objectif premier.
+  Pour la gestion d'énergie, c'est de ce E-MPC qu'il s'agit.}.
+Cette méthode se base sur une optimisation en-ligne qui, \emph{à chaque pas de temps},
+résout le problème d'optimisation pour en déduire une trajectoire optimale à suivre.
+Au départ, le coût à minimiser est  une somme sur période longue voire infinie
+(i.e. pour la maison solaire : la facture énergétique \eqref{eq:C_inv}
+sur tout la période de test). Pour rendre le calcul d'optimisation plus rapide,
+cette somme est tronquée à un nombre de pas restreint,
+appelé ``horizon de prédiction'', noté $H$.
+À l'instant $k$, la fonction coût à minimiser s'écrit:
+%
+\begin{equation} \label{eq:mpc_cost}
+  J(k) = \sum_{i=k}^{k+H} c_{grid}(i)P_{grid}(i)
+\end{equation} 
+
+Cette minimisation génère une \emph{trajectoire optimale}
+de toutes les variables de décision ($P_{sto}$, $P_{grid}$...)
+sur la période $k$ à $k+H$.
+Cependant, seule le premier instant de la trajectoire ($P_{sto}(k)$, $P_{grid}(k)$...)
+est appliqué au système, car à l'instant de décision suivant,
+la trajectoire est réoptimisée sur la période $k+1$ à $k+H$.
+C'est une optimisation sur un \emph{horizon glissant}.
+Cela permet d'utiliser les informations les plus à jour à chaque pas de temps.
+
+Mis à part l'horizon racourci, le problème d'optimisation
+est identique à la méthode déterministe de la partie précédente (§\ref{ss:anticip}).
+En particulier, il est de classe linéaire et se résout donc très efficacement\footnote{
+  un problème quadratique serait pareillement facile}.
+Par contre la simulation sur toute la période de test est plus longue,
+à cause de la répétition de cette optimisation.
+
+\subsubsection{Prévision des entrées incertaines}
+
+Dans la partie précédente (§\ref{ss:anticip}), nous avons souligné
+qu'optimisation qui utilise des données futures n'est pas utilisable
+en pratique. Cependant, la fonction coût du MPC \eqref{eq:mpc_cost} dépend des
+mêmes données futures, quoique sur une horizon plus court.
+Toute commande prédictive nécessite donc une méthode de \emph{prévision des entrées incertaines}.
+
+Pour la maison solaire, nous avons pour l'instant testé deux type de prévision:
+\begin{itemize}
+ \item prévision anticipatrice, inapplicable en pratique, mais qui permet
+ de comparer le MPC à l'optimisation déterministe sur tout la durée deu problème
+ (§\ref{ss:anticip}), c'est à dire d'étudier l'effet de la troncature du coût
+ à un horizon $H$
+ \item prévision réaliste simple égale à la moyenne à chaque heure du jour
+ ($hod = 0, 0.5, ..., 23.5$) sur les données passées
+ (les 30 jours d'apprentissage correspondant au mois précédent le test, cf. §\ref{ss:sol_data}).
+\end{itemize}
+
+Cette prévision est présentée figure \ref{fig:pred}.
+On peut constater que la prévision est meilleure pour la consommation
+que pour la production solaire. En effet, la production solaire présente
+une forte variabilité. Par exemple à midi solaire, la moyenne est à 2\,kW
+pour une production réelle allant de presque 0 à plus de 3\,kW.
+
+On constate également une certaine \emph{persistence} des signaux,
+c'est-à-dire que l'erreur de prévision est autocorrélée.
+
+\begin{figure}[!ht]
+        \begin{center}
+                \includegraphics[width=1\columnwidth]{figures/daily_traj_M-1-2011-11-28_PV4kWp.pdf}
+        \end{center}
+
+        \caption{Prévision de la consommation $P_{load}^*$ et du productible $P_{sun}$
+        (pour une puissance des panneaux $P_{PVp}$ = 4\,kW\sub{c})
+        par calcul de la moyenne à chaque heure du jour, par pas d'une demi-heure,
+        sur les 30 jours d'apprentissage.
+        La superposition des trajectoires de chaque jour permet de constater
+        que l'erreur de prévision est potentiellement grande, surtout pour la production.
+        }
+        \label{fig:pred}
+\end{figure}
+
+\subsubsection{Réglage de l'horizon de prédiction}
+La longueur de l'horizon prédiction $H$ (entier $\geq 1$, mais qu'il est plus commode d'exprimer en heure)
+est paramètre à régler de toute commande prédictive.
+
+...
+
+utilise une \emph{prévision ponctuelle (moyenne)} des entrées incertaines.
 Elle compense l'erreur de prévision en répétant l'optimisation sur un \emph{horizon glissant}.
 L'implémentation numérique est efficace si le problème d'optimisation est linéaire (ou en tout cas convexe),
 ce qui est le cas ici.

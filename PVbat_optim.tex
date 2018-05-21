@@ -97,7 +97,7 @@ Benchmark open source sur une maison solaire
 
 \newcommand\tsp[1]{\textsuperscript{#1}}
 \newcommand\sub[1]{\textsubscript{#1}}
-
+\newcommand\tpc{\textperiodcentered}
 
 \author{
 \fontsize{11pt}{11pt}\selectfont
@@ -117,23 +117,27 @@ Pierre HAESSIG\tsp{*}, Jesse James PRINCE AGBODJAN\tsp{*}, Romain BOURDAIS\tsp{*
 
 \fontsize{9pt}{9pt}\selectfont
 \textbf{RÉSUME --
-Le pilotage optimal des systèmes énergétiques nécessite l'emploi d'algorithmes
-de gestion optimale.
-Ces outils se rattachent à théories de disciplines variées (Automatique, Optimisation, Recheche Opérationnelle),
-qui ont chacune leur spécificité tout en se recouvrant partiellement.
+Le pilotage optimal des systèmes énergétiques nécessite des stratégies
+de gestion basées sur des algorithmes d'optimisation.
+La palette d'outils est large, or chaque outil fait appel à des théories variées
+(optimisation convexe, dynamique, stochastique...)
+qui nécessitent chacune un temps d'appropriation allant de quelques jours à plusieurs mois.
 %
-Il est donc difficile, pour la personne ``non-initiée'', de saisir les principales caractéristiques
-de chaque approche pour pouvoir les comparer et finalement trouver
-quelles méthodes sont plus adaptées à un problème donné.
+Il est donc difficile, pour le ou la praticien\tpc{}ne novice en gestion d'énergie
+de saisir les principales caractéristiques de chaque approche
+pour pouvoir les comparer objectivement et finalement trouver
+la ou les méthodes les plus adaptées à un problème donné.
 %
-Pour permettre une comparaison objective et transparente,
-nous proposons de problème simple de gestion d'énergie : une maison solaire 
-avec production photovoltaïque et stockage, dont nous justifions le dimensionnement.
-Ce benchmark accessible en ligne est open source et multi-langage (Python, Julia et Matlab).
-Nous l'illustrons par une première comparaison de quelques méthodes de gestion d'énergie
-(règle heuristique, MPC et optimisation anticipative)
-et nous soulignons en particulier l'effet de l'incertitude
-sur la production solaire.
+Pour faciliter une comparaison objective et transparente,
+nous proposons un problème de gestion d'énergie emblématique et simple : une maison solaire
+avec production photovoltaïque et stockage.
+Après avoir justifié le dimensionnement du système,
+nous illustrons le benchmark par une première comparaison de quelques méthodes de gestion d'énergie
+(règle heuristique, MPC et optimisation anticipative).
+Nous soulignons en particulier l'effet de l'incertitude de la production solaire
+sur la performance.
+Ce benchmark, avec les méthodes de gestion décrites,
+est open source, accessible en ligne et multi-langage (Python, Julia et Matlab).
 % Extrait de l'ancien résumé, avec des idées à reprendre?
 % comparer différentes méthodes en soulignant en particulier les investissements
 % en temps à prévoir :
@@ -142,8 +146,8 @@ sur la production solaire.
 % temps pour l'implémentation numérique et la validation des résultats.
 }\\
 
-\textbf{\textit{Gestion d'énergie, Optimisation dynamique, Optimisation stochastique,
-Commande prédictive, Autoconsommation photovoltaïque}}
+\textbf{\textit{Gestion d'énergie, Optimisation dynamique,
+Commande prédictive, Dimensionnement, Autoconsommation photovoltaïque.}}
 
 \fontsize{10pt}{10pt}\selectfont
 

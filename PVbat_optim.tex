@@ -26,6 +26,12 @@
 \providecommand{\norm}[1]{\lVert#1\rVert}
 \providecommand{\avg}[1]{\langle#1\rangle}
 
+% Typographie:
+\newcommand\tsp[1]{\textsuperscript{#1}}
+\newcommand\sub[1]{\textsubscript{#1}}
+\newcommand\kWc{kW\sub{c}{}} % point médian
+\newcommand\tpc{\textperiodcentered} % point médian
+
 % détails, en gris: (e.g. std in table)
 \providecommand{\deta}[1]{\textcolor{gray}{#1}}
 
@@ -95,10 +101,6 @@ quel algorithme choisir ?\\
 Benchmark open source sur une maison solaire
 }
 
-\newcommand\tsp[1]{\textsuperscript{#1}}
-\newcommand\sub[1]{\textsubscript{#1}}
-\newcommand\tpc{\textperiodcentered}
-
 \author{
 \fontsize{11pt}{11pt}\selectfont
 Pierre HAESSIG\tsp{*}, Jesse James PRINCE AGBODJAN\tsp{*}, Romain BOURDAIS\tsp{*}, Hervé GUÉGUEN\tsp{*}\\
@@ -156,16 +158,16 @@ Commande prédictive, Dimensionnement, Autoconsommation photovoltaïque.}}
 
 De très nombreux travaux de recherche portent sur le pilotage des systèmes énergétiques
 pour optimiser leur fonctionnement.
-Les méthodes de gestion d'énergie, développées depuis les années 1950,
-sont nombreuses et variées (cf. partie \ref{s:opt_meth}).
+Les méthodes de gestion d'énergie sont nombreuses et variées (cf. partie \ref{s:opt_meth}).
 Ainsi, la personne qui aborde un problème de gestion d'énergie
 est confrontée à un choix qui est souvent difficile à \emph{objectiver}.
 En effet, les difficutés associées à chaque méthode sont de nature divers:
 difficultés de compréhension du cadre théorique, difficultés d'implémentation
 numérique ou de temps de calcul, et parfois existence de
-``dépendances cachées''\footnote{exemples de dépendance:
-la méthode ``commande prédictive'' (MPC) nécessite d'avoir des prévisions des entrées incertaines.
-Beaucoup d'autres méthodes nécessitent des modèles statistiques de ces entrées.}
+``dépendances cachées''\footnote{
+  exemple de dépendance : la méthode ``commande prédictive'' (MPC)
+  nécessite une prévisions des entrées incertaines,
+  à générer si l'on n'en dispose pas déjà, cf. partie \ref{ss:mpc}.}.
 Malheureusement, les méthodes a priori les plus performantes du point de vue de l'optimalité
 cumulent la plupart des ces difficultés.
 Dès lors, la personne face au choix pourrait avoir peur d'investir beaucoup de son temps
@@ -179,10 +181,10 @@ Il permet, sur un exemple simple, mais pertinent, d'avoir un aperçu de différe
 de pilotage\footnote{``pilotage'', ``gestion'', ``commande'', ``optimisation''...
 le vocabulaire change selon les disciplines ou le contexte.
 Nous utilisons ici ces termes de façon interchangeable.}.
-Ce benchmark doit permettre de comparer les comparer
+Ce benchmark doit permettre de les comparer
 à la fois du point de vue de la performance (optimalité du résultat),
 mais aussi de comparer leur mise en oeuvre, en particulier l'implémentation
-dans différents langages de programmation.
+dans différents langages de programmation (complexité du code source, dépendances logicielles).
 
 Il existe des travaux comparant des méthodes de gestion d'énergie, sur des exemples réels complexes
 (barrages hydroélectriques \cite{Zambelli:2011:SBA}, véhicules hybrides \cite{Jiang:2017:ToVT}).
@@ -229,8 +231,45 @@ c'est à dire le coût de l'énergie consommée du réseau:
 \end{equation}
 
 où $c_{grid}$ est le prix de l'énergie (\texteuro/kWh), potentiellement variable,
-mais connu à l'avance.
-En plus du signal prix, connu, les données du problèmes (en rouge sur la figure) sont:
+mais supposé connu à l'avance.
+
+\subsubsection{Données du problème}
+\label{sss:fixed_var}
+
+La stratégie de gestion qui minimise le coût \eqref{eq:C_grid}
+dépend pour commencer des variations du prix de l'électricité $c_{grid}$ (€/kWh).
+Nous avons choisi un signal connu à l'avance, fonction de l'heure du jour,
+avec deux niveaux de prix:
+\begin{itemize}
+ \item $c_{night}$ : heures creuses la nuit, de 0h00 à 6h00
+ \item $c_{day}$ : heures pleines la journée à partir de 6h00
+\end{itemize}
+
+Formellement, l'heure du jour $hod$ (``hour of the day'') est définie par:
+%
+\begin{equation} \label{eq:hod}
+  hod = t \; \% \; 24 \in [0, 24[
+\end{equation} 
+où $t$ est le temps exprimé en heures, avec $t=0$ calé à minuit.
+Le prix est alors défini par morceaux, fonction de $hod$:
+\begin{equation}
+  c_{grid}(hod) = \begin{cases}
+    c_{night} = 0.10 \text{ €/kWh} & \text{ pour } 0 \leq hod < 6\text{ h}\\
+    c_{day} \;\;\,  = 0.20 \text{ €/kWh} & \text{ pour } 6 \leq hod < 24\text{ h}
+  \end{cases}
+\end{equation}
+
+Pour avoir effet heures pleines / heures creuses vraiment incitatif,
+nous avons choisi des prix nettement différents.
+
+Le signal prix pourrait bien sûr être complexifié avec plus de niveaux de prix
+(par exemple avec des ``heures de pointe''), et une dépendance au jour de la semaine
+(par exemple un tarif semaine / weekend).
+Une autre piste de tarification originale et vertueuse pour réduire la puissance réseau souscrite
+est de faire payer cher la puissance au-delà de la puissance souscrite\footnote{
+  principe de la pénalité de dépassement de l'ancien ``tarif vert'' d'EDF}.
+
+En plus du signal prix, les données du problèmes (en rouge sur la figure \ref{fig:solhome}) sont:
 
 \begin{itemize}
  \item $P_{sun}$ : productible solaire, c'est-à-dire la production des panneaux en régime
@@ -238,16 +277,30 @@ MPPT\footnote{Maximum power point tracking}
  \item $P_{load}^*$ : consommation souhaitée par la maison
 \end{itemize}
 
-En revanche, ces deux signaux ne sont pas connus à l'avance :
+À l'inverse du prix, ces deux signaux ne sont pas connus à l'avance :
 ce sont des \emph{entrées incertaines}.
-On note que le productible solaire est proportionnel
-à la puissance nominale (puissance crête) des panneaux $P_{PVp}$ (kW\sub{c}),
-qui est un paramètre de dimensionnement et non d'optimisation.
-Du point de vue de la gestion d'énergie, $P_{PVp}$ est donc fixée.
+Cela signifie qu'à un instant de la simulation, le choix des variables
+de décisions ne peut dépendre que des valeurs passées de ces variables
+(contrainte de non-anticipativité).
+Le jeu de donnée source est décrit partie \ref{ss:sol_data}.
+
+Le problème s'appuie aussi sur trois paramètres fixes:
+\begin{itemize}
+ \item capacité de la batterie $E_{rated}$ (kWh)
+ \item puissance nominale des panneaux $P_{PVp}$ (\kWc)
+ \item puissance réseau souscrite $P_{grid}^{max}$ (kW)
+\end{itemize}
+
+La valeur des paramètres est donnée dans le tableau \ref{tab:dim_stats}.
+L'origine de ces valeurs, c'est-à-dire le dimensionnement de la maison solaire,
+est détaillée partie \ref{ss:dimens}.
+
+\subsubsection{Variables de décision}
+\label{sss:opti_var}
 
 Les degrés de libertés du problème (en vert sur la figure) sont au nombre de quatre.
 La puissance soutirée du réseau, $P_{grid}$,
-est libre mais limitée à la puissance souscrite $P_{grid}^{max}$
+est limitée par la puissance souscrite
 et l'injection est interdite\footnote{
 équivalent, du point de vue de l'optimisation, à autoriser l'injection, mais sans la rémunérer}:
 %
@@ -273,7 +326,7 @@ Le stockage, dont on néglige les pertes, est modélisé par l'énergie qu'il co
   E_{sto}(k+1) = E_{sto}(k) + P_{sto}(k)\Delta_t
 \end{equation}
 %
-et ce stockage a une capacité limitée $E_{rated}$ :
+et cette énergie est limitée par la capacité de stockage :
 %
 \begin{equation}
   0 \leq E_{sto} \leq E_{rated}
@@ -335,67 +388,36 @@ se simplifie en:
 %et cette écriture présente l'intérêt de regrouper les données d'entrée
 %d'une part et les variables de décision de l'autre. côte
 
-\subsubsection{Modèle du prix de l'électricité}
-
-La stratégie de gestion qui minimise le coût \eqref{eq:C_inv}
-dépend du prix de l'électricité $c_{grid}$ (€/kWh).
-Nous avons choisi un signal:
-
-\begin{itemize}
- \item connu à l'avance
- \item fonction de l'heure du jour
- \item avec deux niveaux de prix:
- $c_{night}$ la nuit (heures creuses, à partir de 0h00)
- $c_{day}$ la journée (heures pleines, à partir de 6h00 jusqu'au jour suivant), .
-\end{itemize}.
-
-Formellement, l'heure du jour $hod$ (``hour of the day'') est définie par:
-%
-\begin{equation} \label{eq:hod}
-  hod = t \; \% \; 24 \in [0, 24[
-\end{equation} 
-où $t$ est le temps exprimé en heures, avec $t=0$ calé à minuit.
-Le prix est alors défini par morceaux, fonction de $hod$:
-\begin{equation}
-  c_{grid}(hod) = \begin{cases}
-    c_{night} = 0.10 \text{ €/kWh} & \text{ pour } 0 \leq hod < 6\text{ h}\\
-    c_{day} \;\;\,  = 0.20 \text{ €/kWh} & \text{ pour } 6 \leq hod < 24\text{ h}
-  \end{cases}
-\end{equation}
-
-Pour avoir effet heures pleines / heures creuses vraiment incitatif,
-nous avons choisi des prix nettement différents.
-
-Le signal prix pourrait bien sûr être complexifié avec plus de niveaux de prix
-(par exemple avec des ``heures de pointe''), et une dépendance au jour de la semaine
-(par exemple un tarif semaine / weekend).
-Une autre piste de tarification originale et vertueuse pour réduire la puissance réseau souscrite
-est de faire payer cher la puissance au-delà de la puissance souscrite\footnote{
-  principe de la pénalité de dépassement de l'ancien ``tarif vert'' d'EDF}.
 
 \subsection{Dimensionnement de la maison solaire}
+\label{ss:dimens}
 
 La performance d'un système photovoltaïque-stockage dépend certes de la loi de gestion,
-mais aussi très fortement de son dimensionnement :
-capacité de stockage, puissance des panneaux et  puissance souscrite.
-La question de l'optimisaation du dimensionnement, bien qu'intéressante,
-n'est pas l'objet de notre banc de test.
-Nous nous contentons donc de fixer un dimensionnement ``raisonnable''.
+mais aussi très fortement de son dimensionnement
+(capacité de stockage $E_{rated}$,
+puissance des panneaux $P_{PVp}$ et 
+puissance souscrite $P_{grid}^{max}$).
 
-Les paramètres choisis sont donnés dans le tableau \ref{tab:dim_stats}.
-Le détail des données de test est présenté dans la partie suivante,
-mais on peut d'ores et déjà faire les commentaires suivants:
+La question de l'optimisation du dimensionnement, bien qu'intéressante,
+n'est pas l'objet de notre banc de test, mais il est tout de même nécessaire
+de trouver un dimensionnement ``raisonnable''.
+%
+Avant d'expliquer notre méthode de dimensionnement, voici une analyse
+succinte de son résultat (tableau \ref{tab:dim_stats}) :
 
 \begin{itemize}
- \item Avec 4\,kW\sub{c} de panneaux, la production solaire couvre 91\%
+ \item $P_{PVp}$ : Avec 4\,kW\sub{c} de panneaux, la production solaire couvre 91\%
 de la consommation sur la période de test (avec bien sûr une forte variabilité journalière).
- \item La batterie de 8\,kWh correspond environ à la moitié de la consommation
- et  de la production journalière.
- \item Les 3 kW de puissance réseau souscrite sont plus grands
+ \item $E_{rated}$ : La batterie de 8\,kWh correspond à environ la moitié de la consommation
+ ou de la production solaire journalière.
+ \item $P_{grid}^{max}$ : Les 3 kW de puissance réseau souscrite sont plus grands
  que la charge maximale journalière habituelle,
- car nous avons choisi de ne pas nous intéresser à la gestion d'un réseau faible
+ car nous avons choisi de ne pas nous intéresser à la gestion d'une connexion réseau faible
  dans cette première version du test.
 \end{itemize}
+
+Notons que le dimensionnement dépend bien sûr des données
+des consommation et de production solaire (cf. détail partie \ref{ss:sol_data}).
 
 \begin{table}[!h]
 %% increase table row spacing, adjust to taste
@@ -416,7 +438,7 @@ calculés par bootstrap.}
       \multicolumn{2}{c}{Paramètres} & \multicolumn{2}{c}{Statistiques des données} \\
       \midrule
       $E_{rated}$       & 8 kWh  & $\avg{P_{load}^*}$ &    17,02 \deta{± 0.33} kWh/j\\
-      $P_{PVp}$         & 4 \sub{c}  & $\avg{P_{sun}}$    &    15,60 \deta{± 0.96} kWh/j\\
+      $P_{PVp}$         & 4 \kWc  & $\avg{P_{sun}}$    &    15,60 \deta{± 0.96} kWh/j\\
       $P_{grid}^{max}$  & 3 kW   & $\avg{P_{nl}}$     & \;\,1,42 \deta{± 0.94} kWh/j\\
       \bottomrule
     \end{tabular}
@@ -425,9 +447,9 @@ calculés par bootstrap.}
 
 \subsubsection{Méthode de dimensionnement}
 
-Pour arriver au dimensionnement (4\,kW\sub{c}, 8\,kWh), nous avons conduit une étude
+Pour arriver au dimensionnement (4\,\kWc, 8\,kWh), nous avons conduit une étude
 de sensibilité sur les paramètres $P_{PVp}$ et $E_{rated}$, respectivement
-entre 0 et 6\,kW\sub{c} (par pas de 0,167) et entre 0 et 20\,kWh (pas de 0,5).
+entre 0 et 6\,\kWc (par pas de 0,167) et entre 0 et 20\,kWh (pas de 0,5).
 Pour chaque paire de valeur, nous avons simulé la maison solaire
 en utilisant la loi de gestion ``règle heuristique simple'' (cf. section \ref{ss:heuris})
 qui est très rapide à simuler (40 ms pour les 30 jours) et est optimal
@@ -439,22 +461,22 @@ du point de vue de la consommation d'énergie (mais pas de la facture).
 	  \includegraphics[width=0.8\columnwidth]{figures/Sizing_E_grid_invest_heatmap.pdf}
   \end{center}
 
-  \caption{Effet du dimensionnement sur la consommation d'énergie réseau.
-  Superposition des lignes d'iso-investissement
+  \caption{Effet du dimensionnement de la maison solaire sur sa consommation d'énergie réseau.
+  Superposition des lignes d'iso-investissement.
   }
   \label{fig:P_grid_map}
 \end{figure}
 
-La figure \ref{fig:P_grid_map} donne la puissance moyenne consommée ($\avg{P_{grid}}$)
+La figure \ref{fig:P_grid_map} donne la puissance moyenne consommée sur le réseau ($\avg{P_{grid}}$)
 pour chaque dimensionnement. Celle-ci est égale à 17\,kWh/j sans PV ni batterie
 et baisse à mesure que $P_{PVp}$ et $E_{rated}$ augmentent\footnote{
-  dans le détail,
+  Dans le détail,
   lorsque $E_{rated}=0$ la consommation baisse rapidement avec $P_{PVp}$
-  tant qu'on ne dépasse pas 1 à 2\,kW\sub{c}. Pour intégrer davantage de PV,
+  tant qu'on ne dépasse pas 1 à 2\,\kWc. Pour intégrer davantage de PV,
   il faut ajouter une batterie.
   Inversement, pour $P_{PVp}=0$, la batterie seule ne permet pas de baisser la consommation.
   Elle pourrait néanmoins faire baisser la facture (en déplaçant la consommation)
-  si une gestion optimale était employée}.
+  si une gestion optimale était employée.}.
 Les iso-lignes de consommation (blanches) ont une forme coudées
 et nous allons montrer pourquoi c'est \emph{au niveau d'un coude que le dimensionnement est optimal}.
 
@@ -474,8 +496,8 @@ des panneaux et la capacité de la batterie:
   C_{inv} = c_P P_{PVp} + c_E E_{rated}
 \end{equation} 
 et nous avons choisi $c_E$ = 0.5 €/kWh (source : un Tesla Powerwall de 13,5 kWh s'affiche à 7 k€)
-et $c_P$ = 2 €/kW\sub{c} (optimiste pour une petite installation de 4 kW\sub{c},
-mais raisonnable pour une installation ``9 à 36 \sub{c}, ISB''\footnote{\url{http://www.photovoltaique.info/Couts-d-investissement.html}}).
+et $c_P$ = 2 €/\kWc{} (optimiste pour une petite installation de 4\,\kWc,
+mais raisonnable pour une installation ``9 à 36 \kWc, ISB''\footnote{\url{http://www.photovoltaique.info/Couts-d-investissement.html}}).
 Les iso-lignes d'investissement (noires) sont donc des droites inclinées
 et le dimensionnement choisi coûte 12\,k€.
 
@@ -487,23 +509,20 @@ du banc de test \eqref{eq:C_grid}).
   C_{op} = T_{life} \times \avg{c_{grid}.P_{grid} }
 \end{equation} 
 
-La durée de vie $T_{life}$ est égale à 20 ans (et exprimée en heures).
+La durée de vie $T_{life}$ est égale à 20 ans (exprimée en heures).
 Vu que nous avons choisi une loi de gestion heuristique qui ne gère pas les heures pleines et creuses,
 nous avons choisis, pour le dimensionnement uniquement, un prix de l'electricité $c_{grid}$ fixe.
-Alors, le coût opérationnel \eqref{eq:C_op} est simplement proportionnel à
-la consommation moyenne $P_{grid}$.
+Par conséquent, le coût opérationnel \eqref{eq:C_op} est simplement proportionnel à
+la consommation réseau moyenne ($\avg{P_{grid}}$).
 On comprend alors pourquoi, à coût d'investissement donné (cad sur une ligne noire figure \ref{fig:P_grid_map})
 on a intérêt choisir le point qui tangente une courbe iso-consommation (blanche),
 car il minimise le coût opérationnel. Cette tangeance est obtenu dans un coude, comme annoncé plus haut.
 
-La position du coude dépend du niveau d'investissement choisi,
-et l'on peut décrire l'ensemble des coudes comme étant environ la demi-droite
-passant par les points (1\,kW\sub{c}, 0\,kWh) et (4\,kW\sub{c}, 8\,kWh).
-On peut dès lors :
+Pour choisir le dimensionnement optimal, il existe deux méthodes :
 
 \begin{itemize}
  \item soit choisir a priori un investissement initial et en déduire le dimensionnement
- dans le coude correspondant.
+ dans le coude correspondant,
  \item soit choisir le dimensionnement qui minimise le coût global sur cycle de vie.
 \end{itemize}
 
@@ -512,51 +531,70 @@ On peut dès lors :
 	  \includegraphics[width=0.8\columnwidth]{figures/Total_cost_map_grid020.pdf}
   \end{center}
 
-  \caption{Coût total (investissement + fonctionnement)
+  \caption{Effet du dimensionnement de la maison solaire sur son coût total sur cycle de vie
+  (investissement + fonctionnement sur 20 ans).
   }
   \label{fig:cost_tot}
 \end{figure}
 
-Avec la 1\tsp{re} méthode, notre dimensionnement est l'optimum
-pour un investissement de 12\,k€.
+Avec la 1\tsp{re} méthode, le résultat dépend du niveau d'investissement choisi.
+Notre dimensionnement est l'optimum pour un investissement de 12\,k€.
+Le dimensionnement le moins cher se situe autour du point
+(1\,\kWc, 0\,kWh). Pour un investissement croissant,
+le dimensionnement optimal se déplace approximativement le long
+d'une demi-droite passant par (4\,\kWc, 8\,kWh), soit environ
+2,7\,kWh/\kWc.
+Au-delà du point (5\,\kWc, 11\,kWh), le réduction de consommation réseau devient très faible.
+
 La 2\tsp{e} méthode est illustrée sur la figure \ref{fig:cost_tot},
 pour un prix de l'électricité $c_{grid}$ = 0,20\,€/kWh.
 Le dimensionnement que nous proposons (diamand rouge : 4\,kW\sub{c}, 8\,kWh)
 est très proche de l'optimum (disque vert).
 Il appartient en fait à la région quasi optimale (surlignée en vert)
 où le coût total est inférieur à 101\% du minimum.
-Le coût total d'environ 17\,k€ se réparti donc en 12\,k€ d'investissement
+Le coût total d'environ 17\,k€ se réparti en 12\,k€ d'investissement
 et 5\,k€ de fonctionnement (facture d'électricité sur 20 ans).
 
-Avec la méthode qui minimise $C_{tot}$,
-le résultat dépend fortement du choix de $c_{grid}$
+Ce résultat dépend fortement du choix de $c_{grid}$
 (et de la durée d'amortissement $T_{life}$)
 et nous avons donc répété l'analyse pour un prix entre 0,10 et 0,30\,€/kWh\footnote{%
   tracé animé de la figure \ref{fig:cost_tot} disponible sur le site du benchmarck}.
 Il apparaît que notre dimensionnement est dans la zone quasi optimale pour un prix
-entre 0,16 et 0,21\,€/kWh.
+compris entre 0,16 et 0,21\,€/kWh.
 
 
 \subsection{Données de la maison solaire}
 \label{ss:sol_data}
 
-Notre banc de test est alimenté par le \emph{jeu de données réelles et ouvert} ``\href{https://www.ausgrid.com.au/Common/About-us/Corporate-information/Data-to-share/Solar-home-electricity-data.aspx}{Solar home electricity data}''
+Notre banc de test est alimenté par le jeu de données \emph{réelles et ouvert}
+``\href{https://www.ausgrid.com.au/Common/About-us/Corporate-information/Data-to-share/Solar-home-electricity-data.aspx}{Solar home electricity data}''
 de l'opérateur Ausgrid (réseau de Sydney et sa région, Australie).
 Il contient 3 années de consommation et production, au pas demi-horaire ($\Delta_t$ = 0,5\,h),
 de 300 clients résidentiels disposants de panneaux PV.
 
-Pour le banc de test, nous avons sélectionné un client sans charge pilotable\footnote{
-  la description détaillée de ce choix est fournie dans le fichier \href{https://github.com/pierre-haessig/solarhome-control-bench/blob/master/data/README.md}{data/README.md} du dépôt, avec plusieurs graphiques supplémentaires.}
+Pour le banc de test, nous avons sélectionné le client sans charge pilotable\footnote{
+  Client numéroté ``12''. La description détaillée de ce choix est fournie dans le fichier \href{https://github.com/pierre-haessig/solarhome-control-bench/blob/master/data/README.md}{data/README.md} du dépôt, avec plusieurs graphiques supplémentaires.
+}
 et nous avons choisi 30 jours consécutifs de test, du 29/11/2011 au 28/12/2011.
-Les premiers jours sont représentés figure \ref{fig:testdata}
-(après mise à l'échelle à 4\,kW\sub{c} de son installation PV).
+Les premiers jours de test sont représentés figure \ref{fig:testdata}.
+
+La donnée de consommation est utilisée directement, mais
+la donnée de productible solaire $P_{sun}$ nécessite une mise à l'échelle:
+\begin{equation}
+  P_{sun} = P_{PVp} \times P_{sun}^{1k} = P_{PVp}/1,04 \times GP 
+\end{equation}
+%
+où $P_{sun}^{1k}$ correspond à la production potentielle d'un panneau de 1\,\kWc.
+Elle est égale à $GP/1,04$ où $GP$ est la mesure de la production
+dans le jeu de donnée original, et 1,04\,\kWc{} la taille de l'installation photovoltaique
+réelle du client choisi.
 
 \begin{figure}[!ht]
         \begin{center}
                 \includegraphics[width=1\columnwidth]{figures/data_week_2011-11-29.pdf}
         \end{center}
 
-        \caption{Consommation et production PV durant les 7 jours de test
+        \caption{Consommation et productible solaire durant les 7 premiers jours de test
         }
         \label{fig:testdata}
 \end{figure}
@@ -567,7 +605,7 @@ L'enjeu est de bien respecter la stricte séparation entre ``training set''
 et ``test set'', bien connue en machine learning, et qui permet d'éviter les effets de surapprentissage
 (``overfitting'').
 
-Le tableau \ref{tab:perf_stats} donne les moyennes statistiques du productible solaire $P_{sun}$
+Le tableau \ref{tab:dim_stats} donne les moyennes statistiques du productible solaire $P_{sun}$
 et de la consommation souhaitée $P_{load}^*$.
 Nous avons choisi d'exprimer ces moyennes en kWh/jour pour que les valeurs soient indépendantes
 des la durée du test (30\,j). De plus, cela permet de mettre en regard la capacité de la batterie
@@ -585,14 +623,15 @@ Il a vocation à contenir des exemples dans les langages de programmation
 parmi les plus utilisés pour ce type de problème:
 Matlab, Python et Julia.
 
-\section{Approches d'optimisation}
+\section{Méthodes de gestion d'énergie}
 \label{s:opt_meth}
 
 Le but du banc de test ``maison solaire'' que nous proposons est de comparer
-plusieurs lois de gestion de l'énergie pour minimiser la facture d'électricité \eqref{eq:C_tot}.
+plusieurs lois de gestion de l'énergie pour minimiser la facture d'électricité \eqref{eq:C_grid}.
 Nous présentons ici les premières stratégies que nous avons implémentées.
 Le tracé temporel des 5 premiers jours du test est donné
-figure \ref{fig:temporel}, pour trois méthodes différentes.
+figure \ref{fig:temporel}, pour trois méthodes différentes
+que nous allons détailler.
 
 \subsection{Contrôle par règle heuristique simple}
 \label{ss:heuris}
@@ -606,15 +645,19 @@ des heuristiques pertinentes.
 Pour le cas de la maison solaire, si l'on s'en tient à minimiser
 la consommation d'énergie (moyenne de $P_{grid}$),
 par opposition à la facture (moyenne de $c_{grid}.P_{grid}$),
-voici une stratégie très efficace:
+une stratégie très efficace consiste charger la batterie
+avec le surplus solaire net (si production > consommation)
+ou bien la décharger pour fournir la consommation nette (si consommation > production).
+Formellement, ces deux actions s'écrivent en une équation :
 %
 \begin{equation} \label{eq:heuris_sto}
-  P_{sto} = -P_{nl} = P_{sun} - P_{load}^*, \text{ tant que possible}
+  P_{sto} = -P_{nl} = P_{sun} - P_{load}^*, \text{ ``tant que possible''}
 \end{equation}
 %
-où tant que possible signifie que la batterie n'est pas pleine ou vide,
-selon le signe de $P_{nl}$.
-On utilise les variables auxiliaires définies parties \ref{sss:auxi_var}.
+où ``tant que possible'' signifie que tant que la batterie n'est pas pleine ou vide,
+selon le signe de $P_{nl}$
+(variable auxiliaire définie partie \ref{sss:auxi_var}).
+%
 Si l'équation \eqref{eq:heuris_sto} est applicable, alors on déduit
 de la conservation de la puissance \eqref{eq:cons2} que $P_{gc} = 0$,
 c'est-à-dire $P_{grid} = 0$ (on ne consomme rien) et
@@ -631,7 +674,7 @@ toujours pour assurer la conservation de la puissance \eqref{eq:cons2}:
   P_{gc} = P_{grid} - P_{curt} = P_{nl} = P_{load}^* - P_{sun}
 \end{equation}
 
-Comme $P_{grid}$ et $P_{curt}$ sont exclusives, deux sous-cas se présentent:
+Comme $P_{grid}$ et $P_{curt}$ sont des variables de décision exclusives, deux sous-cas se présentent:
 \begin{itemize}
  \item si $P_{nl}>0$ (c.-à-d. consommation > productible et batterie vide),
  le réseau prend le relais: $P_{grid} = P_{nl}$
@@ -642,7 +685,8 @@ Comme $P_{grid}$ et $P_{curt}$ sont exclusives, deux sous-cas se présentent:
 
 Ce comportement est visible sur en haut de la figure \ref{fig:temporel},
 où l'on observe que pendant une grande partie du temps,
-la batterie suit la charge nette (charge si production, décharge si forte consommation)
+la batterie suit la charge nette. Ainsi, elle se charge en cas d'excédent solaire,
+elle se décharge si la consommation dépasse la production
 et le recours $P_{gc}$ est constant égal à zéro.
 Si la batterie est vide, et tant que la consommation domine,
 le réseau prend le relais ($P_{gc}>0$, souligné en rouge)
@@ -651,7 +695,8 @@ l'écrêtage intervient ($P_{gc}<0$, souligné en jaune).
 
 L'analyse quantitative des résultats (tableau \ref{tab:perf_stats}, ligne ``heuristique'')
 montrent que la consommation d'énergie ($\avg{P_{grid}}$ = 3,38\,kWh/j) est minimale, car égale à celle de 
-l'optimisation anticipative qui minimise la consommation, ligne ``optim. éner.'').
+l'optimisation anticipative qui minimise la consommation, ligne ``optim. éner.''
+(cf. partie \ref{ss:anticip}).
 Par contre, la facture n'est pas optimale, car cette méthode ne tient pas compte
 des heures creuses. D'ailleurs, on observe figure \ref{fig:temporel}
 que l'appel au réseau ($P_{gc}>0$) ne se fait pas préférentiellement pendant
@@ -711,12 +756,12 @@ Une fois ce travail de modélisation effectué, l'objectif sera d'obtenir une lo
           & 1.94
           & 3.38
           & 0.563\\
-      MPC
+      MPC 24\,h
           & 0.03
           & 2.94
           & 4.38
           & 0.543\\
-      MPC anticip.
+      MPC 24\,h anticip.
           & 0.03
           & 1.94
           & 3.38
@@ -765,63 +810,71 @@ Une fois ce travail de modélisation effectué, l'objectif sera d'obtenir une lo
 \label{ss:anticip}
 
 Cette méthode consiste en une optimisation globale de la trajectoire des signaux
-sur tout l'horizon du problème (30 jours pour notre test), en utilisant
-la valeur des données d'entrées.
-Toutefois, cela implique que la décision sur les premiers instants dépend
-de données futures! La performance est donc articiellement bonne (coût sous-évalué),
-car ces données ne sont pas connus en pratique.
-Cette méthode n'est donc pas implémentable in situ.
-Une variante plus réaliste et très courante est la commande prédictive
-(cf. partie suivante \ref{ss:mpc}), à condition de ne pas l'utiliser
-avec une prévision anticipative. La simulation est par contre plus coûteuse,
-car une optimisation doit être effectuée à chaque pas de temps.
+sur tout l'horizon du problème (30 jours pour notre test).
+L'optimisation utilise la valeur observée des d'entrées incertaines,
+ce qui implique que la décision sur les premiers instants dépend
+de données futures.
+La contrainte de non-anticipativité des décisions n'est donc pas respectée 
+et la performance est donc surévaluée (c-à-d. facture sous-évaluée).
+Comme en pratique les valeurs futures des entrées incertaines ne sont pas connues,
+cette méthode n'est pas implémentable in situ.
 
 L'optimisation anticipative est utilisée dans plusieurs études scientifiques,
-en particulier de dimensionnement (\cite{Rigo-Mariani:2014:SGE}),
-car elle fournie une ``baseline de performance''
-plus attrayante qu'une gestion empirique.
+en particulier de dimensionnement (ex : \cite{Rigo-Mariani:2014:SGE}),
+car elle offre une performance plus attrayante qu'une gestion empirique.
 Cependant, nous pensons que cette approche est risquée, car il n'y a aucune maitrise
-du niveau de sous-évaluation du coût par rapport à une gestion réel.
+du niveau de sous-évaluation du coût par rapport à une gestion réelle.
 
-Sur la maison solaire, vu le modèle présenté partie \ref{ss:model},
-la fonction coût est linéaire en la variable de décision $P_{grid}$
-et des contraintes sont linéaires aussi.
-Le problème d'optimisation est donc du type ``programme linéaire''
-qui est très efficacement soluble malgré la taille
-($30 \times 48 = 1440$ pas de temps, avec plusieurs variables de décision).
-Nous l'avons implémenté en Julia avec le package JuMP\cite{Dunning:2017:JuMP}
-(outil de modélisation comparable à AMPL ou GAMS, mais implémenté en Julia
-et open source).
-
-Nous avons implémenté deux variantes du problème
-et les résultats quantitatifs sont présentés dans le tableau \ref{tab:perf_stats}:
-%
-\begin{itemize}
-  \item optimisation de la facture (ligne ``optim. anticip.'')
-  \item optimisation de la consommation énergétique (ligne ``optim. éner.''),
-  équivalente à une minimisation de la facture, mais avec un prix fixe
-\end{itemize}
-
-Nous déduisons trois faits des résultats d'optimisation:
-\begin{itemize}
- \item le minimum ``absolu'' de la facture (connaissant parfaitement le futur)
- est de 0,354\,€/kWh, nettement mieux qu'une gestion heuristique.
- \item les deux objectifs d'optimisation donnent la même consommation d'énergie
- (3.38\,kWh),
- c'est-à-dire que la minimisation de la facture se fait par déplacement
- de bloc d'énergie à l'échelle d'une journée, sans consommer plus.
- \item la gestion heuristiques obtient la même consommation,
- donc la connaissance du futur n'apporte aucun gain énergétique,
- seulement un gain financier.
-\end{itemize}
+Le résultat quantitatif de l'optimisation est présenté dans le tableau \ref{tab:perf_stats}
+à la ligne ``optim. anticip.''.
+Nous en déduisons que le minimum absolu de la facture énergétique 
+(connaissant parfaitement le futur) est de 0,354\,€/j,
+et cette valeur nettement plus basse qu'avec une gestion heuristique (0,563\,€/j).
 
 Sur le bas de la figure \ref{fig:temporel}, on peut analyser qualitativement
-la gestion d'énergie. En particulier, on observe que la recharge de la batterie
+cette gestion d'énergie. En particulier, on observe que la recharge de la batterie
 par appel au réseau se fait presque exclusivement la nuit.
 Par ailleurs, la quantité d'énergie appelée dépend nettement de la production solaire
 \emph{de la journée suivante} (grosse recharge nocturne sur faible production future,
 pas de recharge nocture si forte production future).
 L'effet d'anticipation joue donc bien un rôle important.
+
+\subsubsection{Variante : minimisation de la consommation réseau}
+Accessoirement, nous avons implémenté une variante du problème
+qui optimise la consommation d'énergie réseau 
+(équivalent à la minimisation de la facture si le prix était fixe).
+Cette variante (ligne ``optim. éner.'' du tableau \ref{tab:perf_stats})
+permet de prouver que la consommation d'énergie de 3.38\,kWh,
+atteinte également par la gestion heuristique (non anticipative)
+et par l'optimisation de la facture est un \emph{plancher absolu}.
+Cela montre deux choses.
+Premièrement, la connaissance du futur n'apporte aucun gain énergétique,
+seulement un gain financier.
+Deuxièment, la minimisation de la facture se fait uniquement
+par déplacements de blocs d'énergie pour mieux exploiter les
+période de prix bas.
+
+\subsubsection{Complexité de la résolution numérique}
+\label{sss:opt_complex}
+
+Un autre aspect important de cette optimisation est la complexité
+de sa résolution numérique. Elle dépend de la \emph{convexité}
+\cite{Boyd:2004:CvxOptim} du problème d'optimisation.
+Pour maison solaire, vu le modèle présenté partie \ref{ss:model},
+la fonction coût est linéaire en la variable de décision $P_{grid}$,
+de même que les contraintes (en particulier l'évolution de l'état d'énergie,
+car on a négligé les pertes).
+Le problème d'optimisation est donc du type ``programme linéaire''
+(sous-cas le plus classique parmi les problèmes d'optimisation convexe)
+qui se résout très efficacement malgré sa taille
+($30 \times 48 = 1440$ pas de temps, avec plusieurs variables de décision).
+Nous l'avons implémenté en Julia avec le package JuMP\cite{Dunning:2017:JuMP}
+(outil de modélisation comparable à AMPL ou GAMS, mais implémenté en Julia
+et open source).
+
+Nous présentons à présent une variante notable de l'optimisation déterministe : la commande prédictive.
+Elle a le grand avantage d'être implémentable, car les données incertaines futures y sont remplacées
+par des prévisions.
 
 \subsection{Commande prédictive (MPC)}
 \label{ss:mpc}
@@ -837,9 +890,10 @@ pour la gestion d'énergie et la commande des systèmes en général\footnote{
   Pour la gestion d'énergie, c'est de ce E-MPC qu'il s'agit.}.
 Cette méthode se base sur une optimisation en-ligne qui, \emph{à chaque pas de temps},
 résout le problème d'optimisation pour en déduire une trajectoire optimale à suivre.
-Au départ, le coût à minimiser est  une somme sur période longue voire infinie
-(i.e. pour la maison solaire : la facture énergétique \eqref{eq:C_inv}
-sur tout la période de test). Pour rendre le calcul d'optimisation plus rapide,
+Pour le MPC, comme pour la programmation dynamique, le coût à minimiser est supposé
+être une somme sur période longue voire infinie,
+ce qui correspond bien à la facture d'énergie \eqref{eq:C_grid} de la maison solaire.
+Pour rendre le calcul d'optimisation plus rapide,
 cette somme est tronquée à un nombre de pas restreint,
 appelé ``horizon de prédiction'', noté $H$.
 À l'instant $k$, la fonction coût à minimiser s'écrit:
@@ -858,41 +912,55 @@ C'est une optimisation sur un \emph{horizon glissant}.
 Cela permet d'utiliser les informations les plus à jour à chaque pas de temps.
 
 Mis à part l'horizon racourci, le problème d'optimisation
-est identique à la méthode déterministe de la partie précédente (§\ref{ss:anticip}).
-En particulier, il est de classe linéaire et se résout donc très efficacement\footnote{
-  un problème quadratique serait pareillement facile}.
-Par contre la simulation sur toute la période de test est plus longue,
-à cause de la répétition de cette optimisation.
+est identique à celui de l'optimisation déterministe de la partie précédente.
+Comme le problème est linéaire (cf. §\ref{sss:opt_complex}) il se résout très efficacement
+et la convergence est garantie, ce qui est important pour une mise en oeuvre
+(à noter tout de même que le système de commande doit embarquer un solveur linéaire).
+
+Par contre l'optimisation est effectuée à chaque pas de temps,
+ce qui ralonge le temps de simulation sur la période de test.
+Lorsque l'on souhaite répéter les simulations de nombreuses fois en phase
+de dimensionnement, cela peut être prohibitif,
+d'où l'usage de la gestion heuristique partie \ref{ss:dimens}.
+
+Un dernier point positif important est à souligner pour le MPC :
+il est très flexible.
+Ainsi, l'ajout d'une formule de prix plus complexe (ex. : heures de pointes)
+ne changerait en rien sa structure.
 
 \subsubsection{Prévision des entrées incertaines}
 
 Dans la partie précédente (§\ref{ss:anticip}), nous avons souligné
-qu'optimisation qui utilise des données futures n'est pas utilisable
+qu'une optimisation qui utilise des données futures n'est pas utilisable
 en pratique. Cependant, la fonction coût du MPC \eqref{eq:mpc_cost} dépend des
 mêmes données futures, quoique sur une horizon plus court.
 Toute commande prédictive nécessite donc une méthode de \emph{prévision des entrées incertaines}.
 
-Pour la maison solaire, nous avons pour l'instant testé deux type de prévision:
+Pour la maison solaire, nous avons pour l'instant testé deux prévisions :
 \begin{itemize}
- \item prévision anticipatrice, inapplicable en pratique, mais qui permet
- de comparer le MPC à l'optimisation déterministe sur tout la durée deu problème
- (§\ref{ss:anticip}), c'est à dire d'étudier l'effet de la troncature du coût
- à un horizon $H$
+ \item prévision anticipatrice, c'est-à-dire la connaissance parfaite du future sur l'horizon $H$
  \item prévision réaliste simple égale à la moyenne à chaque heure du jour
  ($hod = 0, 0.5, ..., 23.5$) sur les données passées
  (les 30 jours d'apprentissage correspondant au mois précédent le test, cf. §\ref{ss:sol_data}).
 \end{itemize}
 
-Cette prévision est présentée figure \ref{fig:pred}.
+La prévision anticipatrice est inapplicable en pratique, mais elle permet
+de comparer le MPC à l'optimisation déterministe (§\ref{ss:anticip} qui travaille,
+elle, sur toute la durée du problème.
+Cela permet donc d'étudier l'effet de la troncature du coût  à un horizon $H$
+
+La prévision réaliste est présentée figure \ref{fig:pred}.
 On peut constater que la prévision est meilleure pour la consommation
 que pour la production solaire. En effet, la production solaire présente
-une forte variabilité. Par exemple à midi solaire, la moyenne est à 2\,kW
+une plus forte variabilité. Par exemple à midi solaire, la moyenne est à 2\,kW
 pour une production réelle allant de presque 0 à plus de 3\,kW.
 
-On constate également une certaine \emph{persistence} des signaux,
+On constate accessoirement une certaine \emph{persistence} des signaux,
 c'est-à-dire que l'erreur de prévision est autocorrélée.
+Cette persistence à l'échelle de quelques heures pourrait permettre
+d'améliorer la prévision.
 
-\begin{figure}[!ht]
+\begin{figure}
         \begin{center}
                 \includegraphics[width=1\columnwidth]{figures/daily_traj_M-1-2011-11-28_PV4kWp.pdf}
         \end{center}
@@ -907,57 +975,121 @@ c'est-à-dire que l'erreur de prévision est autocorrélée.
         \label{fig:pred}
 \end{figure}
 
+\subsubsection{Effet de la prévision sur la performance}
+
+Le résultat quantitatif de la gestion MPC est présenté dans le tableau \ref{tab:perf_stats}
+aux ligne ``MPC...''. L'horizon $H$ a été choisi égal à 24\,h ($H \times \Delta_t = 24$\,h).
+Nous constatons qu'avec la prévision anticipatrice, le coût de la facture énergétique
+atteint 0,354\,€/j, comme l'optimisation sur les 30 jours.
+Avec un horizon de 24\,h, l'effet de la troncature du coût est donc nul.
+
+Par contre, nous observons également qu'avec la prévision réaliste (ligne ``MPC 24 h''),
+la dégradation de la performance est notable : +1\,kWh/j sur la consommation d'énergie
+associé à une augmentation identique de l'écrêtage du productible solaire :
+l'insertion de la production solaire est dégradée.
+Quant à la facture, elle atteint 0,543\,€/j, ce qui est plus faible,
+même si très proche, de celle de la gestion heuristique (0,563\,€/j).
+À ce stade nous ne savons pas si cette différence est significative ou non
+(i.e. robuste vis à vis d'un changement des données d'entrées).
+
+Le tracé de du milieu de la figure \ref{fig:temporel} permet d'analyser qualitativement
+la gestion d'énergie MPC avec prévision réaliste.
+On constate que, face à une journée qui est toujours prévue identique, 
+la gestion d'énergie utilise systématiquement le début de nuit (heure creuse) pour amener la batterie
+à un état d'énergie autour de 3\,kWh.
+On imagine que cela doit permettre de tenir sans appel au réseau sur toute la journée prévue.
+En pratique, si la journée est nuageuse (jour 2), un appel au réseau supplémentaire
+est nécessaire en fin de journée (au tarif heure pleine).
+Inversement, si la journée qui suit est très ensoleillée (jour 4),
+la charge nocturne aurait pu être évitée, mais il est trop tard
+et c'est l'écrêtage qui s'active.
+
 \subsubsection{Réglage de l'horizon de prédiction}
-La longueur de l'horizon prédiction $H$ (entier $\geq 1$, mais qu'il est plus commode d'exprimer en heure)
-est paramètre à régler de toute commande prédictive.
+La longueur de l'horizon prédiction $H$ (nombre de pas entier,
+mais que nous exprimons en heures, comme $H \times \Delta_t$)
+est un paramètre essentiel de toute commande prédictive.
+Pour le régler, nous l'avons fait varier entre 0 et 48\,h,
+et les résultats sont présentés sur la figure \ref{fig:mpc_horiz}.
+Vu l'effet important de la prévision, les deux types précédent
+ont été utilisés (anticipative et réaliste).
 
-...
+Dans le cas de la prévision anticipative, la consommation électrique
+reste largement constante pour toutes les valeurs de l'horizon $H$,
+tandis que le coût décroît jusqu'à sa valeur minimale (0,354\,€/j),
+valeur atteinte dès $H.\Delta_t = 19$\,h.
+Ce seuil s'interprète comme la durée minimale de l'horizon glissant qui permet de couvrir
+à tout instant une partie de la tranche d'heures creuses de deux journées consécutives.
+Ainsi, la recharge nocturne peut être parfaitement ajustée à la production/consommation
+attendue pour la journée suivante.
 
-utilise une \emph{prévision ponctuelle (moyenne)} des entrées incertaines.
-Elle compense l'erreur de prévision en répétant l'optimisation sur un \emph{horizon glissant}.
-L'implémentation numérique est efficace si le problème d'optimisation est linéaire (ou en tout cas convexe),
-ce qui est le cas ici.
+Par contre lorsqu'on utilise la prévision réaliste, l'augmentation
+de l'horizon a un effet innattendu : la performance se dégrade,
+dès qu'on dépasse 3\,h. 
+Le tracé de l'énergie consommée sur le réseau montre une augmentation forte de la consommation moyenne
+lorsque l'horizon passe de 20 à 24\,h.
+Nous supposons donc que le MPC fait une réserve nocturne pour palier un manque
+de soleil attendu.
+Cette augmentation de la consommation se voit aussi sur le coût de l'énergie,
+même s'il n'augmente que lentement, autour de 0.55\,€/j.
+Cette augmentation le fait diverger du coût obtenu avec une prévision anticipatrice parfaite.
 
-Des variantes du MPC déterministe existent pour mieux faire face à l'incertain: le MPC stochastique,
-qui utilise un \emph{ensemble de scénarios}, éventuellement avec un ``recours affine''.
+Ainsi, le MPC qui se base sur une optimisation déterministe
+(les données prévues sont supposées se réaliser) se fait piéger
+par l'erreur de prévision.
+Les pistes d'améliorations sont donc deux ordres:
+amélioration de la prévision d'une part
+(mais difficile, car on pressent que le facteur important est la balance énergétique
+de toute la journée suivant chaque nuit)
+et formulation du problème d'optimisation qui prend en compte les inévitables
+erreurs de prévisions (MPC stochastique, robuste...).
 
-\begin{figure}[!ht]
+\begin{figure}
         \begin{center}
                 \includegraphics[width=1\columnwidth]{figures/MPC_horizon_effect.pdf}
         \end{center}
 
-        \caption{Effet de l'horizon du contrôle MPC sur la performance (consommation d'énergie en haut, coût de cette énergie en bas).
+        \caption{Effet de l'horizon du contrôle MPC sur la performance
+        (consommation d'énergie réseau en haut, coût de cette énergie en bas).
         Courbes bleues: MPC alimenté par une prévision parfaite (anticipative) du futur.
-        Courbes rouges: MPC alimenté par une prévision non anticipative, égale à la moyenne passée à chaque heure du jour. 
+        Courbes rouges: MPC alimenté par une prévision réaliste, égale à la moyenne passée à chaque heure du jour. 
         }
         \label{fig:mpc_horiz}
 \end{figure}
 
-%\subsection{MPC stochastique et robuste}
-
-%une amélioration du MPC déterministe.
-
 % \subsection{Commande prédictive non-linéaire}
 % 
 % Optimica JModelica.org \cite{Akesson:2010:CCE}
-% 
-% sareni sge 2014 \cite{Rigo-Mariani:2014:SGE} : optim linéaire puis reprojection.
-
-\subsection{Comparaison}
-
-
-
 
 \section{Conclusions}
 
-Le banc de test pour la gestion d'énergie d'une maison solaire
-doit permettre de faciliter l'accès à une palette de méthode de gestion
+Nous avons conçu un banc de test open source pour la gestion d'énergie d'une maison solaire.
+Il facilite l'accès et permet la comparaison d'une palette de méthodes,
 sur un exemple simple mais réaliste (e.g. données de production solaire et de consommation réelles).
 
-Perspectives : ce banc de test pour la gestion d'énergie,
-à dimensionnement fixé, est une première étape pour l'étude des méthodes
-de dimensionnement optimal qui prennent en compte l'optimisation de la loi de gestion
-\cite{Haessig:2014:SGE}.
+Les premières stratégies de gestion que nous avons implémentées et comparées
+font ressortir quelques idées attendues
+(ex : les méthodes heuristiques simples donnent de bons résultats sur les problèmes simples).
+D'autres résultats sont nettement moins courants, comme l'effet délétère
+de l'allongement de l'horizon de prédiction sur la performance d'une commande prédictive.
+Autrement dit, une prédiction longue, lorsqu'elle est partiellement fausse, est pire qu'une courte.
+
+Plus généralement, nous avons fait ressortir le grand écart qui existe
+entre la performance de stratégies anticipatives (qui supposent connaitre le futur des données incertaines)
+et la performance des méthodes qui n'utilisent que des donnnées connues.
+Seules ces dernières sont implémentables sur un système réel!
+
+\subsection{Perspectives}
+Parmi les perspectives de ces travaux, il y a bien sûr l'ajout de nouvelles méthodes
+de gestions d'énergie.
+Nous visons en particulier les méthodes qui prennent en compte intrinsèquement
+le caractère incertain des données solaire et de consommation:
+programmation dynamique stochastique, MPC stochastique...
+
+À plus longue échéance, nous souhaitons aller au-delà
+des tests de gestion d'énergie à dimensionnement fixé.
+Nous souhaitons étudier les méthodes de dimensionnement optimal
+qui prennent en compte l'optimisation de la loi de gestion
+(comme nous l'avions fait sur un cas nettement plus simple \cite{Haessig:2014:SGE}).
 
 % structure de décision dans un contexte multi-agent (pas abordé ici
 % car focus sur optimisation d'un système individuel) : centralisé, distribué,

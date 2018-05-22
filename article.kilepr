@@ -17,7 +17,7 @@ MakeIndex=
 QuickBuild=
 
 [document-settings,item:PVbat_optim.tex]
-Bookmarks=977,981,389
+Bookmarks=408,996,1000
 Encoding=UTF-8
 Highlighting=LaTeX
 Indentation Mode=normal
@@ -42,10 +42,10 @@ order=-1
 
 [item:PVbat_optim.tex]
 archive=true
-column=54
+column=29
 encoding=UTF-8
 highlight=LaTeX
-line=818
+line=841
 mode=LaTeX
 open=true
 order=0
@@ -61,10 +61,10 @@ open=false
 order=-1
 
 [view-settings,view=0,item:PVbat_optim.tex]
-CursorColumn=54
-CursorLine=818
+CursorColumn=29
+CursorLine=841
 JumpList=
-ViMarks=.,817,46,[,817,46,],817,46,a,977,0,b,389,0,c,981,0
+ViMarks=.,841,68,[,841,65,],841,68,a,996,0,b,408,0,c,1000,0
 
 [view-settings,view=0,item:article.kilepr]
 CursorColumn=0

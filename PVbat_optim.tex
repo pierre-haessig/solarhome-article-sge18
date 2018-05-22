@@ -9,15 +9,28 @@
 \usepackage{fancyhdr}
 \usepackage[explicit]{titlesec}
 \usepackage{hyperref}
-%\usepackage[square,comma,numbers]{natbib}
+\usepackage[square,comma,numbers]{natbib}
 \usepackage{tabularx}
 \usepackage{xcolor}
+
+% bleu (légèrement turquoise)
+\definecolor{darkblue1}{hsb}{.6,1,.5}
 
 %for columns spanning multiple rows in tables
 \usepackage{multirow}
 %use the booktabs package to get (much!) better vertical spacing above and below "rules" (horizontal lines), resulting in a much more professional look of your tables.
 %use the colortbl package to add color to tables.
 \usepackage{booktabs,colortbl}
+
+% fix problem with ":" in bibtex keys
+% cf http://tex.stackexchange.com/questions/130344/using-citep-leads-to-missing-endcsname-inserted-error
+\makeatletter
+\let\ORG@NAT@sort@cites\NAT@sort@cites
+\def\NAT@sort@cites#1{%
+  \edef\@tempa{\detokenize{#1}}%
+  \ORG@NAT@sort@cites\@tempa
+}
+\makeatother
 
 % Petits extras:
 \usepackage{textcomp} % Symbole Euro € \texteuro
@@ -43,10 +56,16 @@
 
 %\renewcommand{\bibsection}{}
 %\def\bibfont{\footnotesize}
-%\setlength{\bibsep}{0.2em}
+\setlength{\bibsep}{0.3em}
 %\setlength{\bibhang}{10em}
 
-\hypersetup{colorlinks=true, urlcolor=blue, urlbordercolor={0 0 1}, citecolor=black, citebordercolor={1 1 1}}
+\hypersetup{colorlinks=true,
+urlcolor=darkblue1,
+linkcolor=darkblue1,
+citecolor=black,
+}
+
+%\hypersetup{colorlinks=true, urlcolor=blue, urlbordercolor={0 0 1}, citecolor=black, citebordercolor={1 1 1}}
 
 \addto\captionsfrench{\def\figurename{Fig.}}
 \addto\captionsfrench{\def\tablename{Tableau}}
@@ -820,7 +839,7 @@ Comme en pratique les valeurs futures des entrées incertaines ne sont pas connu
 cette méthode n'est pas implémentable in situ.
 
 L'optimisation anticipative est utilisée dans plusieurs études scientifiques,
-en particulier de dimensionnement (ex. : \cite{Rigo-Mariani:2014:SGE}),
+en particulier de dimensionnement (ex. : \cite{Rigo-Mariani:2017:ToSG}),
 car elle offre une performance plus attrayante qu'une gestion empirique.
 Cependant, nous pensons que cette approche est risquée, car il n'y a aucune maitrise
 du niveau de sous-évaluation du coût par rapport à une gestion réelle.

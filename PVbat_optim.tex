@@ -284,9 +284,10 @@ nous avons choisi des prix nettement différents.
 Le signal prix pourrait bien sûr être complexifié avec plus de niveaux de prix
 (par exemple avec des ``heures de pointe''), et une dépendance au jour de la semaine
 (par exemple un tarif semaine / weekend).
-Une autre piste de tarification originale et vertueuse pour réduire la puissance réseau souscrite
-est de faire payer cher la puissance au-delà de la puissance souscrite\footnote{
-  principe de la pénalité de dépassement de l'ancien ``tarif vert'' d'EDF}.
+Il serait aussi possible de faire payer l'énergie plus cher lorsque la puissance
+dépasse la puissance réseau souscrite\footnote{
+  principe de la pénalité de dépassement de l'ancien ``tarif vert'' d'EDF}
+(tarif vertueux pour réduire la puissance souscrite).
 
 En plus du signal prix, les données du problème (en rouge sur la figure \ref{fig:solhome}) sont:
 
@@ -570,7 +571,7 @@ pour un prix de l'électricité $c_{grid}$ = 0,20\,€/kWh.
 Le dimensionnement que nous proposons (diamant rouge : 4\,kW\sub{c}, 8\,kWh)
 est très proche de l'optimum (disque vert).
 Il appartient en fait à la région quasi optimale (surlignée en vert)
-où le coût total est inférieur à 101\% du minimum.
+où le coût total est inférieur à +1\% du minimum.
 Le coût total d'environ 17\,k€ se répartit en 12\,k€ d'investissement
 et 5\,k€ de fonctionnement (facture d'électricité sur 20 ans).
 
@@ -725,27 +726,27 @@ La limite de cette méthode de gestion d'énergie est donc le pendant négatif
 de sa simplicité : il est difficile d'intégrer des complexités du problème
 tel que des tarifs flexibles.
 
-\subsection{Programmation dynamique}
-La programmation dynamique\cite{Bertsekas:2005:DPOC_vol1} est un
-excellent cadre théorique pour poser un problème de gestion avec entrées incertaines (stochastique).
-Point particulier, elle nécessite une modélisation des incertitudes par un \emph{processus markovien}\cite{Haessig:2013:ESPy}.
-L'implémentation numérique est impossible
-si la dimension de l'état est trop grande (>4).
-
-Pour la maison solaire, qui n'a qu'une batterie (1 variable d'état),
-la programmation dynamique devrait être utilisable.
-Pour l'instant, la modélisation markovienne de l'entrée incertaine ($P_{nl}$) reste à faire.
-Une des difficultés est la prise en compte du caractère non stationnaire
-du processus, car production et consommation dépendent fortement de l'heure du jour.
-La variable $hod$ doit donc être ajoutée à l'état.
-La prise en compte de l'autocorrélation de l'entrée se fait également par augmentation
-de l'état\cite[§1.4]{Bertsekas:2005:DPOC_vol1}.
-Pour garder la dimension de l'état $\leq 3$, on n'a le droit qu'à un processus d'ordre
-au plus 1 pour modéliser l'autocorrélation.
-Le travail de modélisation est donc très contraint.
-
-Une fois ce travail de modélisation effectué, l'objectif sera d'obtenir une loi de gestion
-à l'aide du package Python \texttt{stodynprog}\cite{Haessig:2013:ESPy}.
+% \subsection{Programmation dynamique}
+% La programmation dynamique\cite{Bertsekas:2005:DPOC_vol1} est un
+% excellent cadre théorique pour poser un problème de gestion avec entrées incertaines (stochastique).
+% Point particulier, elle nécessite une modélisation des incertitudes par un \emph{processus markovien}\cite{Haessig:2013:ESPy}.
+% L'implémentation numérique est impossible
+% si la dimension de l'état est trop grande (>4).
+%
+% Pour la maison solaire, qui n'a qu'une batterie (1 variable d'état),
+% la programmation dynamique devrait être utilisable.
+% Pour l'instant, la modélisation markovienne de l'entrée incertaine ($P_{nl}$) reste à faire.
+% Une des difficultés est la prise en compte du caractère non stationnaire
+% du processus, car production et consommation dépendent fortement de l'heure du jour.
+% La variable $hod$ doit donc être ajoutée à l'état.
+% La prise en compte de l'autocorrélation de l'entrée se fait également par augmentation
+% de l'état\cite[§1.4]{Bertsekas:2005:DPOC_vol1}.
+% Pour garder la dimension de l'état $\leq 3$, on n'a le droit qu'à un processus d'ordre
+% au plus 1 pour modéliser l'autocorrélation.
+% Le travail de modélisation est donc très contraint.
+%
+% Une fois ce travail de modélisation effectué, l'objectif sera d'obtenir une loi de gestion
+% à l'aide du package Python \texttt{stodynprog}\cite{Haessig:2013:ESPy}.
 
 
 \begin{table}
@@ -894,6 +895,8 @@ et open source).
 Nous présentons à présent une variante notable de l'optimisation déterministe : la commande prédictive.
 Elle a le grand avantage d'être implémentable, car les données incertaines futures y sont remplacées
 par des prévisions.
+
+\newpage
 
 \subsection{Commande prédictive (MPC)}
 \label{ss:mpc}
@@ -1055,7 +1058,7 @@ Cette augmentation le fait diverger du coût obtenu avec une prévision anticipa
 Ainsi, le MPC qui se base sur une optimisation déterministe
 (les données prévues sont supposées se réaliser) se fait piéger
 par l'erreur de prévision.
-Les pistes d'améliorations sont donc deux ordres:
+Les pistes d'améliorations sont donc de deux ordres:
 amélioration de la prévision d'une part
 (mais difficile, car on pressent que le facteur important est la balance énergétique
 de toute la journée suivant chaque nuit)

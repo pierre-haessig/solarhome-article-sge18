@@ -42,7 +42,7 @@
 % Typographie:
 \newcommand\tsp[1]{\textsuperscript{#1}}
 \newcommand\sub[1]{\textsubscript{#1}}
-\newcommand\kWc{kW\sub{c}{}} % point médian
+\newcommand\kWc{kW\sub{c}{}}
 \newcommand\tpc{\textperiodcentered} % point médian
 
 % détails, en gris: (e.g. std in table)
@@ -515,8 +515,8 @@ des panneaux et la capacité de la batterie:
 \begin{equation} \label{eq:C_inv}
   C_{inv} = c_P P_{PVp} + c_E E_{rated}
 \end{equation} 
-et nous avons choisi $c_E$ = 0.5 €/kWh (source : un Tesla Powerwall de 13,5 kWh s'affiche à 7 k€)
-et $c_P$ = 2 €/\kWc{} (optimiste pour une petite installation de 4\,\kWc,
+et nous avons choisi $c_E$ = 0.5 k€/kWh (source : un Tesla Powerwall de 13,5 kWh s'affiche à 7 k€)
+et $c_P$ = 2 k€/\kWc{} (optimiste pour une petite installation de 4\,\kWc,
 mais raisonnable pour une installation ``9 à 36 \kWc, ISB''\footnote{\url{http://www.photovoltaique.info/Couts-d-investissement.html}}).
 Les isolignes d'investissement (noires) sont donc des droites inclinées
 et le dimensionnement choisi coûte 12\,k€.
@@ -929,7 +929,7 @@ de toutes les variables de décision ($P_{sto}$, $P_{grid}$...)
 sur la période $k$ à $k+H$.
 Cependant, seule le premier instant de la trajectoire ($P_{sto}(k)$, $P_{grid}(k)$...)
 est appliqué au système, car à l'instant de décision suivant,
-la trajectoire est réoptimisée sur la période $k+1$ à $k+H$.
+la trajectoire est réoptimisée sur la période $k+1$ à $k+1+H$.
 C'est une optimisation sur un \emph{horizon glissant}.
 Cela permet d'utiliser les informations les plus à jour à chaque pas de temps.
 
